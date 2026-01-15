@@ -65,3 +65,15 @@ func (c *cQuarterlyProfit) Delete(ctx context.Context, req *quarterlyprofit.Dele
 	err = service.StockQuarterlyProfit().Delete(ctx, &req.QuarterlyProfitDeleteInp)
 	return
 }
+
+// GetQuarterlyProfit 获取季度利润数据表数据
+func (c *cQuarterlyProfit) GetQuarterlyProfit(ctx context.Context, req *quarterlyprofit.GetQuarterlyProfitReq) (res *quarterlyprofit.GetQuarterlyProfitRes, err error) {
+	data, err := service.StockQuarterlyProfit().GetQuarterlyProfit(ctx, &req.QuarterlyProfitGetQuarterlyProfitInp)
+	if err != nil {
+		return
+	}
+
+	res = new(quarterlyprofit.GetQuarterlyProfitRes)
+	res.Data = data
+	return
+}

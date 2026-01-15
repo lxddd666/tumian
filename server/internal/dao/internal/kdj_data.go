@@ -13,9 +13,10 @@ import (
 
 // KdjDataDao is the data access object for the table hg_kdj_data.
 type KdjDataDao struct {
-	table   string         // table is the underlying table name of the DAO.
-	group   string         // group is the database configuration group name of the current DAO.
-	columns KdjDataColumns // columns contains all the column names of Table for convenient usage.
+	table    string             // table is the underlying table name of the DAO.
+	group    string             // group is the database configuration group name of the current DAO.
+	columns  KdjDataColumns     // columns contains all the column names of Table for convenient usage.
+	handlers []gdb.ModelHandler // handlers for customized model modification.
 }
 
 // KdjDataColumns defines and stores column names for the table hg_kdj_data.
@@ -45,11 +46,12 @@ var kdjDataColumns = KdjDataColumns{
 }
 
 // NewKdjDataDao creates and returns a new DAO object for table data access.
-func NewKdjDataDao() *KdjDataDao {
+func NewKdjDataDao(handlers ...gdb.ModelHandler) *KdjDataDao {
 	return &KdjDataDao{
-		group:   "default",
-		table:   "hg_kdj_data",
-		columns: kdjDataColumns,
+		group:    "default",
+		table:    "hg_kdj_data",
+		columns:  kdjDataColumns,
+		handlers: handlers,
 	}
 }
 
@@ -75,7 +77,11 @@ func (dao *KdjDataDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *KdjDataDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+	model := dao.DB().Model(dao.table)
+	for _, handler := range dao.handlers {
+		model = handler(model)
+	}
+	return model.Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

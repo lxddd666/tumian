@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
@@ -137,5 +138,28 @@ func (s *sStockFinancialIndicators) View(ctx context.Context, in *stockin.Financ
 		err = gerror.Wrap(err, "获取财务指标分析表信息，请稍后重试！")
 		return
 	}
+	return
+}
+
+// GetFinancialIndicators 获取财务指标分析表数据
+func (s *sStockFinancialIndicators) GetFinancialIndicators(ctx context.Context, in *stockin.FinancialIndicatorsGetFinancialIndicatorsInp) (data *entity.FinancialIndicators, err error) {
+	// 构建 API URL
+	// https://api.zhituapi.com/hs/gs/cwzb/股票代码?token=token证书
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/cwzb/%s", in.Symbol)
+
+	// 构建查询参数
+	params := g.Map{
+		"token": in.Token,
+	}
+
+	// 发送 GET 请求并解析为 entity.FinancialIndicators
+	var result entity.FinancialIndicators
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	if err != nil {
+		err = gerror.Wrap(err, "调用外部API获取财务指标分析表数据失败，请稍后重试！")
+		return
+	}
+
+	data = &result
 	return
 }

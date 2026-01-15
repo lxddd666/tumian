@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
@@ -137,5 +138,28 @@ func (s *sStockShareholderChange) View(ctx context.Context, in *stockin.Sharehol
 		err = gerror.Wrap(err, "获取股东户数变化记录表 (记录相邻报告期的户数变化)信息，请稍后重试！")
 		return
 	}
+	return
+}
+
+// GetShareholderChange 获取股东户数变化记录表数据
+func (s *sStockShareholderChange) GetShareholderChange(ctx context.Context, in *stockin.ShareholderChangeGetShareholderChangeInp) (data *entity.ShareholderChange, err error) {
+	// 构建 API URL
+	// https://api.zhituapi.com/hs/gs/gdbh/股票代码?token=token证书
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/gdbh/%s", in.Symbol)
+
+	// 构建查询参数
+	params := g.Map{
+		"token": in.Token,
+	}
+
+	// 发送 GET 请求并解析为 entity.ShareholderChange
+	var result entity.ShareholderChange
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	if err != nil {
+		err = gerror.Wrap(err, "调用外部API获取股东户数变化记录表数据失败，请稍后重试！")
+		return
+	}
+
+	data = &result
 	return
 }

@@ -13,9 +13,10 @@ import (
 
 // ShareholderCountDao is the data access object for the table hg_shareholder_count.
 type ShareholderCountDao struct {
-	table   string                  // table is the underlying table name of the DAO.
-	group   string                  // group is the database configuration group name of the current DAO.
-	columns ShareholderCountColumns // columns contains all the column names of Table for convenient usage.
+	table    string                  // table is the underlying table name of the DAO.
+	group    string                  // group is the database configuration group name of the current DAO.
+	columns  ShareholderCountColumns // columns contains all the column names of Table for convenient usage.
+	handlers []gdb.ModelHandler      // handlers for customized model modification.
 }
 
 // ShareholderCountColumns defines and stores column names for the table hg_shareholder_count.
@@ -63,11 +64,12 @@ var shareholderCountColumns = ShareholderCountColumns{
 }
 
 // NewShareholderCountDao creates and returns a new DAO object for table data access.
-func NewShareholderCountDao() *ShareholderCountDao {
+func NewShareholderCountDao(handlers ...gdb.ModelHandler) *ShareholderCountDao {
 	return &ShareholderCountDao{
-		group:   "default",
-		table:   "hg_shareholder_count",
-		columns: shareholderCountColumns,
+		group:    "default",
+		table:    "hg_shareholder_count",
+		columns:  shareholderCountColumns,
+		handlers: handlers,
 	}
 }
 
@@ -93,7 +95,11 @@ func (dao *ShareholderCountDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *ShareholderCountDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+	model := dao.DB().Model(dao.table)
+	for _, handler := range dao.handlers {
+		model = handler(model)
+	}
+	return model.Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

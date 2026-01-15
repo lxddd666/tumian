@@ -65,3 +65,15 @@ func (c *cMacdData) Delete(ctx context.Context, req *macddata.DeleteReq) (res *m
 	err = service.StockMacdData().Delete(ctx, &req.MacdDataDeleteInp)
 	return
 }
+
+// GetMacd 获取MACD指标数据
+func (c *cMacdData) GetMacd(ctx context.Context, req *macddata.GetMacdReq) (res *macddata.GetMacdRes, err error) {
+	data, err := service.StockMacdData().GetMacd(ctx, &req.MacdDataGetMacdInp)
+	if err != nil {
+		return
+	}
+
+	res = new(macddata.GetMacdRes)
+	res.Data = data
+	return
+}

@@ -8,20 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// internalMaDataDao is an internal type for wrapping the internal DAO implementation.
-type internalMaDataDao = *internal.MaDataDao
-
 // maDataDao is the data access object for the table hg_ma_data.
 // You can define custom methods on it to extend its functionality as needed.
 type maDataDao struct {
-	internalMaDataDao
+	*internal.MaDataDao
 }
 
 var (
 	// MaData is a globally accessible object for table hg_ma_data operations.
-	MaData = maDataDao{
-		internal.NewMaDataDao(),
-	}
+	MaData = maDataDao{internal.NewMaDataDao()}
 )
 
 // Add your custom methods and functionality below.

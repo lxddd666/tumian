@@ -8,20 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// internalShareholderChangeDao is an internal type for wrapping the internal DAO implementation.
-type internalShareholderChangeDao = *internal.ShareholderChangeDao
-
 // shareholderChangeDao is the data access object for the table hg_shareholder_change.
 // You can define custom methods on it to extend its functionality as needed.
 type shareholderChangeDao struct {
-	internalShareholderChangeDao
+	*internal.ShareholderChangeDao
 }
 
 var (
 	// ShareholderChange is a globally accessible object for table hg_shareholder_change operations.
-	ShareholderChange = shareholderChangeDao{
-		internal.NewShareholderChangeDao(),
-	}
+	ShareholderChange = shareholderChangeDao{internal.NewShareholderChangeDao()}
 )
 
 // Add your custom methods and functionality below.

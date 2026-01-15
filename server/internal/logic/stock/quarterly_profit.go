@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
@@ -137,5 +138,28 @@ func (s *sStockQuarterlyProfit) View(ctx context.Context, in *stockin.QuarterlyP
 		err = gerror.Wrap(err, "获取季度利润数据表 (近一年各季度)信息，请稍后重试！")
 		return
 	}
+	return
+}
+
+// GetQuarterlyProfit 获取季度利润数据表数据
+func (s *sStockQuarterlyProfit) GetQuarterlyProfit(ctx context.Context, in *stockin.QuarterlyProfitGetQuarterlyProfitInp) (data *entity.QuarterlyProfit, err error) {
+	// 构建 API URL
+	// https://api.zhituapi.com/hs/gs/jdlr/股票代码?token=token证书
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/jdlr/%s", in.Symbol)
+
+	// 构建查询参数
+	params := g.Map{
+		"token": in.Token,
+	}
+
+	// 发送 GET 请求并解析为 entity.QuarterlyProfit
+	var result entity.QuarterlyProfit
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	if err != nil {
+		err = gerror.Wrap(err, "调用外部API获取季度利润数据表数据失败，请稍后重试！")
+		return
+	}
+
+	data = &result
 	return
 }

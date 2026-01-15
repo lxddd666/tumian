@@ -7,6 +7,7 @@
 package madata
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -57,3 +58,13 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetMaReq 获取移动平均线(MA)指标数据
+type GetMaReq struct {
+	g.Meta `path:"/maData/getMa" method:"get" tags:"移动平均线(MA)指标数据表" summary:"获取移动平均线(MA)指标数据"`
+	stockin.MaDataGetMaInp
+}
+
+type GetMaRes struct {
+	Data *entity.MaData `json:"data" dc:"返回数据"`
+}

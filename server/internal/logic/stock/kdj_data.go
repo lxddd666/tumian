@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
@@ -137,5 +138,39 @@ func (s *sStockKdjData) View(ctx context.Context, in *stockin.KdjDataViewInp) (r
 		err = gerror.Wrap(err, "获取KDJ随机指标数据表信息，请稍后重试！")
 		return
 	}
+	return
+}
+
+// GetKdj 获取KDJ随机指标数据
+func (s *sStockKdjData) GetKdj(ctx context.Context, in *stockin.KdjDataGetKdjInp) (data *entity.KdjData, err error) {
+	// 构建 API URL
+	// https://api.zhituapi.com/hs/history/kdj/股票代码(如000001.SZ)/分时级别(如d)/除权类型(如n)?token=token证书&st=开始时间&et=结束时间&lt=最新条数
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/history/kdj/%s/%s/%s", in.Symbol, in.Interval, in.AdjustType)
+
+	// 构建查询参数
+	params := g.Map{
+		"token": in.Token,
+	}
+
+	// 添加可选参数
+	if in.StartTime != "" {
+		params["st"] = in.StartTime
+	}
+	if in.EndTime != "" {
+		params["et"] = in.EndTime
+	}
+	if in.Limit > 0 {
+		params["lt"] = in.Limit
+	}
+
+	// 发送 GET 请求并解析为 entity.KdjData
+	var result entity.KdjData
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	if err != nil {
+		err = gerror.Wrap(err, "调用外部API获取KDJ随机指标数据失败，请稍后重试！")
+		return
+	}
+
+	data = &result
 	return
 }

@@ -65,3 +65,15 @@ func (c *cStockBasicInfo) Delete(ctx context.Context, req *stockbasicinfo.Delete
 	err = service.StockBasicInfo().Delete(ctx, &req.StockBasicInfoDeleteInp)
 	return
 }
+
+// GetStockBasicInfo 获取股票基础信息表数据
+func (c *cStockBasicInfo) GetStockBasicInfo(ctx context.Context, req *stockbasicinfo.GetStockBasicInfoReq) (res *stockbasicinfo.GetStockBasicInfoRes, err error) {
+	data, err := service.StockBasicInfo().GetStockBasicInfo(ctx, &req.StockBasicInfoGetStockBasicInfoInp)
+	if err != nil {
+		return
+	}
+
+	res = new(stockbasicinfo.GetStockBasicInfoRes)
+	res.Data = data
+	return
+}

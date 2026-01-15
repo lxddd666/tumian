@@ -65,3 +65,15 @@ func (c *cTopTenCirculatingHolders) Delete(ctx context.Context, req *toptencircu
 	err = service.StockTopTenCirculatingHolders().Delete(ctx, &req.TopTenCirculatingHoldersDeleteInp)
 	return
 }
+
+// GetTopTenCirculatingHolders 获取公司十大流通股东表数据
+func (c *cTopTenCirculatingHolders) GetTopTenCirculatingHolders(ctx context.Context, req *toptencirculatingholders.GetTopTenCirculatingHoldersReq) (res *toptencirculatingholders.GetTopTenCirculatingHoldersRes, err error) {
+	data, err := service.StockTopTenCirculatingHolders().GetTopTenCirculatingHolders(ctx, &req.TopTenCirculatingHoldersGetTopTenCirculatingHoldersInp)
+	if err != nil {
+		return
+	}
+
+	res = new(toptencirculatingholders.GetTopTenCirculatingHoldersRes)
+	res.Data = data
+	return
+}

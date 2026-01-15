@@ -118,7 +118,17 @@ type KdjDataExportModel struct {
 	UpdatedAt    *gtime.Time `json:"updatedAt"    dc:"数据更新时间"`
 }
 
-type GetKdjInp struct {
-	Symbol string `json:"symbol"       dc:"股票或标的代码 (例如: AAPL, 000001.SZ)"`
-	T      int    `json:"t"            dc:"交易时间 (统一为datetime类型，日线数据时间部分设为00:00:00)"`
+// KdjDataGetKdjInp 获取KDJ随机指标数据
+type KdjDataGetKdjInp struct {
+	Symbol     string `json:"symbol" v:"required#股票代码不能为空" dc:"股票代码 (例如: 000001.SZ)"`
+	Interval   string `json:"interval" v:"required#分时级别不能为空" dc:"分时级别 (例如: d)"`
+	AdjustType string `json:"adjustType" v:"required#除权类型不能为空" dc:"除权类型 (例如: n)"`
+	Token      string `json:"token" v:"required#token证书不能为空" dc:"token证书"`
+	StartTime  string `json:"st" dc:"开始时间"`
+	EndTime    string `json:"et" dc:"结束时间"`
+	Limit      int    `json:"lt" dc:"最新条数"`
+}
+
+func (in *KdjDataGetKdjInp) Filter(ctx context.Context) (err error) {
+	return
 }

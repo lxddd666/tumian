@@ -65,3 +65,15 @@ func (c *cEnterpriseHistoricalData) Delete(ctx context.Context, req *enterpriseh
 	err = service.StockEnterpriseHistoricalData().Delete(ctx, &req.EnterpriseHistoricalDataDeleteInp)
 	return
 }
+
+// GetEnterpriseHistoricalData 获取企业级历史行情数据表数据
+func (c *cEnterpriseHistoricalData) GetEnterpriseHistoricalData(ctx context.Context, req *enterprisehistoricaldata.GetEnterpriseHistoricalDataReq) (res *enterprisehistoricaldata.GetEnterpriseHistoricalDataRes, err error) {
+	data, err := service.StockEnterpriseHistoricalData().GetEnterpriseHistoricalData(ctx, &req.EnterpriseHistoricalDataGetEnterpriseHistoricalDataInp)
+	if err != nil {
+		return
+	}
+
+	res = new(enterprisehistoricaldata.GetEnterpriseHistoricalDataRes)
+	res.Data = data
+	return
+}

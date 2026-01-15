@@ -65,3 +65,15 @@ func (c *cBollData) Delete(ctx context.Context, req *bolldata.DeleteReq) (res *b
 	err = service.StockBollData().Delete(ctx, &req.BollDataDeleteInp)
 	return
 }
+
+// GetBoll 获取布林带(BOLL)指标数据
+func (c *cBollData) GetBoll(ctx context.Context, req *bolldata.GetBollReq) (res *bolldata.GetBollRes, err error) {
+	data, err := service.StockBollData().GetBoll(ctx, &req.BollDataGetBollInp)
+	if err != nil {
+		return
+	}
+
+	res = new(bolldata.GetBollRes)
+	res.Data = data
+	return
+}

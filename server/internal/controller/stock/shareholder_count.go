@@ -65,3 +65,15 @@ func (c *cShareholderCount) Delete(ctx context.Context, req *shareholdercount.De
 	err = service.StockShareholderCount().Delete(ctx, &req.ShareholderCountDeleteInp)
 	return
 }
+
+// GetShareholderCount 获取公司股东户数统计表数据
+func (c *cShareholderCount) GetShareholderCount(ctx context.Context, req *shareholdercount.GetShareholderCountReq) (res *shareholdercount.GetShareholderCountRes, err error) {
+	data, err := service.StockShareholderCount().GetShareholderCount(ctx, &req.ShareholderCountGetShareholderCountInp)
+	if err != nil {
+		return
+	}
+
+	res = new(shareholdercount.GetShareholderCountRes)
+	res.Data = data
+	return
+}

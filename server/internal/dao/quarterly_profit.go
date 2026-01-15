@@ -8,20 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// internalQuarterlyProfitDao is an internal type for wrapping the internal DAO implementation.
-type internalQuarterlyProfitDao = *internal.QuarterlyProfitDao
-
 // quarterlyProfitDao is the data access object for the table hg_quarterly_profit.
 // You can define custom methods on it to extend its functionality as needed.
 type quarterlyProfitDao struct {
-	internalQuarterlyProfitDao
+	*internal.QuarterlyProfitDao
 }
 
 var (
 	// QuarterlyProfit is a globally accessible object for table hg_quarterly_profit operations.
-	QuarterlyProfit = quarterlyProfitDao{
-		internal.NewQuarterlyProfitDao(),
-	}
+	QuarterlyProfit = quarterlyProfitDao{internal.NewQuarterlyProfitDao()}
 )
 
 // Add your custom methods and functionality below.

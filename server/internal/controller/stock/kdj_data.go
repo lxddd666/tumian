@@ -65,3 +65,15 @@ func (c *cKdjData) Delete(ctx context.Context, req *kdjdata.DeleteReq) (res *kdj
 	err = service.StockKdjData().Delete(ctx, &req.KdjDataDeleteInp)
 	return
 }
+
+// GetKdj 获取KDJ随机指标数据
+func (c *cKdjData) GetKdj(ctx context.Context, req *kdjdata.GetKdjReq) (res *kdjdata.GetKdjRes, err error) {
+	data, err := service.StockKdjData().GetKdj(ctx, &req.KdjDataGetKdjInp)
+	if err != nil {
+		return
+	}
+
+	res = new(kdjdata.GetKdjRes)
+	res.Data = data
+	return
+}

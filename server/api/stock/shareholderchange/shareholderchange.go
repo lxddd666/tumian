@@ -7,6 +7,7 @@
 package shareholderchange
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -57,3 +58,13 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetShareholderChangeReq 获取股东户数变化记录表数据
+type GetShareholderChangeReq struct {
+	g.Meta `path:"/shareholderChange/getShareholderChange" method:"get" tags:"股东户数变化记录表 (记录相邻报告期的户数变化)" summary:"获取股东户数变化记录表数据"`
+	stockin.ShareholderChangeGetShareholderChangeInp
+}
+
+type GetShareholderChangeRes struct {
+	Data *entity.ShareholderChange `json:"data" dc:"返回数据"`
+}

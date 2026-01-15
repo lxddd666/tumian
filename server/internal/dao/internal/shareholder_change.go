@@ -13,9 +13,10 @@ import (
 
 // ShareholderChangeDao is the data access object for the table hg_shareholder_change.
 type ShareholderChangeDao struct {
-	table   string                   // table is the underlying table name of the DAO.
-	group   string                   // group is the database configuration group name of the current DAO.
-	columns ShareholderChangeColumns // columns contains all the column names of Table for convenient usage.
+	table    string                   // table is the underlying table name of the DAO.
+	group    string                   // group is the database configuration group name of the current DAO.
+	columns  ShareholderChangeColumns // columns contains all the column names of Table for convenient usage.
+	handlers []gdb.ModelHandler       // handlers for customized model modification.
 }
 
 // ShareholderChangeColumns defines and stores column names for the table hg_shareholder_change.
@@ -47,11 +48,12 @@ var shareholderChangeColumns = ShareholderChangeColumns{
 }
 
 // NewShareholderChangeDao creates and returns a new DAO object for table data access.
-func NewShareholderChangeDao() *ShareholderChangeDao {
+func NewShareholderChangeDao(handlers ...gdb.ModelHandler) *ShareholderChangeDao {
 	return &ShareholderChangeDao{
-		group:   "default",
-		table:   "hg_shareholder_change",
-		columns: shareholderChangeColumns,
+		group:    "default",
+		table:    "hg_shareholder_change",
+		columns:  shareholderChangeColumns,
+		handlers: handlers,
 	}
 }
 
@@ -77,7 +79,11 @@ func (dao *ShareholderChangeDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *ShareholderChangeDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+	model := dao.DB().Model(dao.table)
+	for _, handler := range dao.handlers {
+		model = handler(model)
+	}
+	return model.Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

@@ -7,6 +7,7 @@
 package enterprisehistoricaldata
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -57,3 +58,13 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetEnterpriseHistoricalDataReq 获取企业级历史行情数据表数据
+type GetEnterpriseHistoricalDataReq struct {
+	g.Meta `path:"/enterpriseHistoricalData/getEnterpriseHistoricalData" method:"get" tags:"企业级历史行情数据表 (K线数据)" summary:"获取企业级历史行情数据表数据"`
+	stockin.EnterpriseHistoricalDataGetEnterpriseHistoricalDataInp
+}
+
+type GetEnterpriseHistoricalDataRes struct {
+	Data *entity.EnterpriseHistoricalData `json:"data" dc:"返回数据"`
+}

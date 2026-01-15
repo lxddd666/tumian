@@ -57,3 +57,13 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetStockBasicInfoReq 获取股票基础信息表数据
+type GetStockBasicInfoReq struct {
+	g.Meta `path:"/stockBasicInfo/getStockBasicInfo" method:"get" tags:"股票基础信息表" summary:"获取股票基础信息表数据"`
+	stockin.StockBasicInfoGetStockBasicInfoInp
+}
+
+type GetStockBasicInfoRes struct {
+	Data interface{} `json:"data" dc:"返回数据"`
+}

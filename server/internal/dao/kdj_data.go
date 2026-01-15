@@ -8,20 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// internalKdjDataDao is an internal type for wrapping the internal DAO implementation.
-type internalKdjDataDao = *internal.KdjDataDao
-
 // kdjDataDao is the data access object for the table hg_kdj_data.
 // You can define custom methods on it to extend its functionality as needed.
 type kdjDataDao struct {
-	internalKdjDataDao
+	*internal.KdjDataDao
 }
 
 var (
 	// KdjData is a globally accessible object for table hg_kdj_data operations.
-	KdjData = kdjDataDao{
-		internal.NewKdjDataDao(),
-	}
+	KdjData = kdjDataDao{internal.NewKdjDataDao()}
 )
 
 // Add your custom methods and functionality below.

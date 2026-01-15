@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
@@ -137,5 +138,36 @@ func (s *sStockShareholderCount) View(ctx context.Context, in *stockin.Sharehold
 		err = gerror.Wrap(err, "获取公司股东户数统计表 (按报告期统计)信息，请稍后重试！")
 		return
 	}
+	return
+}
+
+// GetShareholderCount 获取公司股东户数统计表数据
+func (s *sStockShareholderCount) GetShareholderCount(ctx context.Context, in *stockin.ShareholderCountGetShareholderCountInp) (data *entity.ShareholderCount, err error) {
+	// 构建 API URL
+	// https://api.zhituapi.com/hs/fin/hm/股票代码（如000001.SZ）?token=token证书&st=开始时间&et=结束时间
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/fin/hm/%s", in.Symbol)
+
+	// 构建查询参数
+	params := g.Map{
+		"token": in.Token,
+	}
+
+	// 添加可选参数
+	if in.StartTime != "" {
+		params["st"] = in.StartTime
+	}
+	if in.EndTime != "" {
+		params["et"] = in.EndTime
+	}
+
+	// 发送 GET 请求并解析为 entity.ShareholderCount
+	var result entity.ShareholderCount
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	if err != nil {
+		err = gerror.Wrap(err, "调用外部API获取公司股东户数统计表数据失败，请稍后重试！")
+		return
+	}
+
+	data = &result
 	return
 }

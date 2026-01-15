@@ -65,3 +65,15 @@ func (c *cFinancialIndicators) Delete(ctx context.Context, req *financialindicat
 	err = service.StockFinancialIndicators().Delete(ctx, &req.FinancialIndicatorsDeleteInp)
 	return
 }
+
+// GetFinancialIndicators 获取财务指标分析表数据
+func (c *cFinancialIndicators) GetFinancialIndicators(ctx context.Context, req *financialindicators.GetFinancialIndicatorsReq) (res *financialindicators.GetFinancialIndicatorsRes, err error) {
+	data, err := service.StockFinancialIndicators().GetFinancialIndicators(ctx, &req.FinancialIndicatorsGetFinancialIndicatorsInp)
+	if err != nil {
+		return
+	}
+
+	res = new(financialindicators.GetFinancialIndicatorsRes)
+	res.Data = data
+	return
+}

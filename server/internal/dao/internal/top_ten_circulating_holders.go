@@ -13,9 +13,10 @@ import (
 
 // TopTenCirculatingHoldersDao is the data access object for the table hg_top_ten_circulating_holders.
 type TopTenCirculatingHoldersDao struct {
-	table   string                          // table is the underlying table name of the DAO.
-	group   string                          // group is the database configuration group name of the current DAO.
-	columns TopTenCirculatingHoldersColumns // columns contains all the column names of Table for convenient usage.
+	table    string                          // table is the underlying table name of the DAO.
+	group    string                          // group is the database configuration group name of the current DAO.
+	columns  TopTenCirculatingHoldersColumns // columns contains all the column names of Table for convenient usage.
+	handlers []gdb.ModelHandler              // handlers for customized model modification.
 }
 
 // TopTenCirculatingHoldersColumns defines and stores column names for the table hg_top_ten_circulating_holders.
@@ -67,11 +68,12 @@ var topTenCirculatingHoldersColumns = TopTenCirculatingHoldersColumns{
 }
 
 // NewTopTenCirculatingHoldersDao creates and returns a new DAO object for table data access.
-func NewTopTenCirculatingHoldersDao() *TopTenCirculatingHoldersDao {
+func NewTopTenCirculatingHoldersDao(handlers ...gdb.ModelHandler) *TopTenCirculatingHoldersDao {
 	return &TopTenCirculatingHoldersDao{
-		group:   "default",
-		table:   "hg_top_ten_circulating_holders",
-		columns: topTenCirculatingHoldersColumns,
+		group:    "default",
+		table:    "hg_top_ten_circulating_holders",
+		columns:  topTenCirculatingHoldersColumns,
+		handlers: handlers,
 	}
 }
 
@@ -97,7 +99,11 @@ func (dao *TopTenCirculatingHoldersDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *TopTenCirculatingHoldersDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+	model := dao.DB().Model(dao.table)
+	for _, handler := range dao.handlers {
+		model = handler(model)
+	}
+	return model.Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

@@ -8,20 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// internalShareholderCountDao is an internal type for wrapping the internal DAO implementation.
-type internalShareholderCountDao = *internal.ShareholderCountDao
-
 // shareholderCountDao is the data access object for the table hg_shareholder_count.
 // You can define custom methods on it to extend its functionality as needed.
 type shareholderCountDao struct {
-	internalShareholderCountDao
+	*internal.ShareholderCountDao
 }
 
 var (
 	// ShareholderCount is a globally accessible object for table hg_shareholder_count operations.
-	ShareholderCount = shareholderCountDao{
-		internal.NewShareholderCountDao(),
-	}
+	ShareholderCount = shareholderCountDao{internal.NewShareholderCountDao()}
 )
 
 // Add your custom methods and functionality below.

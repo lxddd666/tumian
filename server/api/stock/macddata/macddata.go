@@ -7,6 +7,7 @@
 package macddata
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -57,3 +58,13 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetMacdReq 获取MACD指标数据
+type GetMacdReq struct {
+	g.Meta `path:"/macdData/getMacd" method:"get" tags:"MACD指标数据表" summary:"获取MACD指标数据"`
+	stockin.MacdDataGetMacdInp
+}
+
+type GetMacdRes struct {
+	Data *entity.MacdData `json:"data" dc:"返回数据"`
+}

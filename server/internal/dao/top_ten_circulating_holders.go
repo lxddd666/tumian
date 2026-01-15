@@ -8,20 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// internalTopTenCirculatingHoldersDao is an internal type for wrapping the internal DAO implementation.
-type internalTopTenCirculatingHoldersDao = *internal.TopTenCirculatingHoldersDao
-
 // topTenCirculatingHoldersDao is the data access object for the table hg_top_ten_circulating_holders.
 // You can define custom methods on it to extend its functionality as needed.
 type topTenCirculatingHoldersDao struct {
-	internalTopTenCirculatingHoldersDao
+	*internal.TopTenCirculatingHoldersDao
 }
 
 var (
 	// TopTenCirculatingHolders is a globally accessible object for table hg_top_ten_circulating_holders operations.
-	TopTenCirculatingHolders = topTenCirculatingHoldersDao{
-		internal.NewTopTenCirculatingHoldersDao(),
-	}
+	TopTenCirculatingHolders = topTenCirculatingHoldersDao{internal.NewTopTenCirculatingHoldersDao()}
 )
 
 // Add your custom methods and functionality below.

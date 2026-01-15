@@ -7,6 +7,7 @@
 package shareholdercount
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -57,3 +58,13 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetShareholderCountReq 获取公司股东户数统计表数据
+type GetShareholderCountReq struct {
+	g.Meta `path:"/shareholderCount/getShareholderCount" method:"get" tags:"公司股东户数统计表 (按报告期统计)" summary:"获取公司股东户数统计表数据"`
+	stockin.ShareholderCountGetShareholderCountInp
+}
+
+type GetShareholderCountRes struct {
+	Data *entity.ShareholderCount `json:"data" dc:"返回数据"`
+}

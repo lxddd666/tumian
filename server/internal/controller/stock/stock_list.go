@@ -71,3 +71,15 @@ func (c *cStockList) Status(ctx context.Context, req *stocklist.StatusReq) (res 
 	err = service.StockList().Status(ctx, &req.StockListStatusInp)
 	return
 }
+
+// GetStockList 获取股票列表核心表数据
+func (c *cStockList) GetStockList(ctx context.Context, req *stocklist.GetStockListReq) (res *stocklist.GetStockListRes, err error) {
+	data, err := service.StockList().GetStockList(ctx, &req.StockListGetStockListInp)
+	if err != nil {
+		return
+	}
+
+	res = new(stocklist.GetStockListRes)
+	res.Data = data
+	return
+}

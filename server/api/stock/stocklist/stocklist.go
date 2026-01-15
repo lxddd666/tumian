@@ -7,6 +7,7 @@
 package stocklist
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -65,3 +66,13 @@ type StatusReq struct {
 }
 
 type StatusRes struct{}
+
+// GetStockListReq 获取股票列表核心表数据
+type GetStockListReq struct {
+	g.Meta `path:"/stockList/getStockList" method:"get" tags:"股票列表核心表" summary:"获取股票列表核心表数据"`
+	stockin.StockListGetStockListInp
+}
+
+type GetStockListRes struct {
+	Data *entity.StockList `json:"data" dc:"返回数据"`
+}

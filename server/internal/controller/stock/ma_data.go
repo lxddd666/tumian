@@ -65,3 +65,15 @@ func (c *cMaData) Delete(ctx context.Context, req *madata.DeleteReq) (res *madat
 	err = service.StockMaData().Delete(ctx, &req.MaDataDeleteInp)
 	return
 }
+
+// GetMa 获取移动平均线(MA)指标数据
+func (c *cMaData) GetMa(ctx context.Context, req *madata.GetMaReq) (res *madata.GetMaRes, err error) {
+	data, err := service.StockMaData().GetMa(ctx, &req.MaDataGetMaInp)
+	if err != nil {
+		return
+	}
+
+	res = new(madata.GetMaRes)
+	res.Data = data
+	return
+}

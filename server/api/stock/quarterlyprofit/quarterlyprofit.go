@@ -7,6 +7,7 @@
 package quarterlyprofit
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -57,3 +58,13 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetQuarterlyProfitReq 获取季度利润数据表数据
+type GetQuarterlyProfitReq struct {
+	g.Meta `path:"/quarterlyProfit/getQuarterlyProfit" method:"get" tags:"季度利润数据表 (近一年各季度)" summary:"获取季度利润数据表数据"`
+	stockin.QuarterlyProfitGetQuarterlyProfitInp
+}
+
+type GetQuarterlyProfitRes struct {
+	Data *entity.QuarterlyProfit `json:"data" dc:"返回数据"`
+}

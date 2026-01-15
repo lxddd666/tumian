@@ -8,20 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// internalStockBasicInfoDao is an internal type for wrapping the internal DAO implementation.
-type internalStockBasicInfoDao = *internal.StockBasicInfoDao
-
 // stockBasicInfoDao is the data access object for the table hg_stock_basic_info.
 // You can define custom methods on it to extend its functionality as needed.
 type stockBasicInfoDao struct {
-	internalStockBasicInfoDao
+	*internal.StockBasicInfoDao
 }
 
 var (
 	// StockBasicInfo is a globally accessible object for table hg_stock_basic_info operations.
-	StockBasicInfo = stockBasicInfoDao{
-		internal.NewStockBasicInfoDao(),
-	}
+	StockBasicInfo = stockBasicInfoDao{internal.NewStockBasicInfoDao()}
 )
 
 // Add your custom methods and functionality below.

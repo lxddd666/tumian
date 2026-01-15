@@ -8,20 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// internalBollDataDao is an internal type for wrapping the internal DAO implementation.
-type internalBollDataDao = *internal.BollDataDao
-
 // bollDataDao is the data access object for the table hg_boll_data.
 // You can define custom methods on it to extend its functionality as needed.
 type bollDataDao struct {
-	internalBollDataDao
+	*internal.BollDataDao
 }
 
 var (
 	// BollData is a globally accessible object for table hg_boll_data operations.
-	BollData = bollDataDao{
-		internal.NewBollDataDao(),
-	}
+	BollData = bollDataDao{internal.NewBollDataDao()}
 )
 
 // Add your custom methods and functionality below.

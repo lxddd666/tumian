@@ -12,31 +12,31 @@ import (
 // StockBasicInfo is the golang structure of table hg_stock_basic_info for DAO operations like Where/Data.
 type StockBasicInfo struct {
 	g.Meta         `orm:"table:hg_stock_basic_info, do:true"`
-	Id             interface{} // 自增主键
-	Symbol         interface{} // 股票代码
-	Ii             interface{} //
-	Ei             interface{} //
-	Exchange       interface{} // 交易所名称
-	Name           interface{} //
-	ShortName      interface{} //
-	EnName         interface{} //
+	Id             any         // 自增主键
+	Symbol         any         // 股票代码
+	Ii             any         //
+	Ei             any         //
+	Exchange       any         // 交易所名称
+	Name           any         //
+	ShortName      any         //
+	EnName         any         //
 	Od             *gtime.Time // 上市日期
 	DataUpdateDate *gtime.Time //
-	Pc             interface{} //
-	Up             interface{} //
-	Dp             interface{} //
-	Pk             interface{} //
-	Fv             interface{} //
-	Tv             interface{} //
-	FloatRatio     interface{} // 流通股比例 (%)
-	Is             interface{} //
-	TradingStatus  interface{} // 交易状态描述
-	Industry       interface{} //
-	Sector         interface{} //
-	MarketType     interface{} //
-	DataSource     interface{} //
-	IsActive       interface{} //
-	Version        interface{} //
+	Pc             any         //
+	Up             any         //
+	Dp             any         //
+	Pk             any         //
+	Fv             any         //
+	Tv             any         //
+	FloatRatio     any         // 流通股比例 (%)
+	Is             any         //
+	TradingStatus  any         // 交易状态描述
+	Industry       any         //
+	Sector         any         //
+	MarketType     any         //
+	DataSource     any         //
+	IsActive       any         //
+	Version        any         //
 	CreatedAt      *gtime.Time //
 	UpdatedAt      *gtime.Time //
 }

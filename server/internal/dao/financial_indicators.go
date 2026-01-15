@@ -8,20 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// internalFinancialIndicatorsDao is an internal type for wrapping the internal DAO implementation.
-type internalFinancialIndicatorsDao = *internal.FinancialIndicatorsDao
-
 // financialIndicatorsDao is the data access object for the table hg_financial_indicators.
 // You can define custom methods on it to extend its functionality as needed.
 type financialIndicatorsDao struct {
-	internalFinancialIndicatorsDao
+	*internal.FinancialIndicatorsDao
 }
 
 var (
 	// FinancialIndicators is a globally accessible object for table hg_financial_indicators operations.
-	FinancialIndicators = financialIndicatorsDao{
-		internal.NewFinancialIndicatorsDao(),
-	}
+	FinancialIndicators = financialIndicatorsDao{internal.NewFinancialIndicatorsDao()}
 )
 
 // Add your custom methods and functionality below.

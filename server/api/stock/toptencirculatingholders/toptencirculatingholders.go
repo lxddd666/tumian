@@ -7,6 +7,7 @@
 package toptencirculatingholders
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -57,3 +58,13 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetTopTenCirculatingHoldersReq 获取公司十大流通股东表数据
+type GetTopTenCirculatingHoldersReq struct {
+	g.Meta `path:"/topTenCirculatingHolders/getTopTenCirculatingHolders" method:"get" tags:"公司十大流通股东表 (数据来源于定期报告)[citation:4]" summary:"获取公司十大流通股东表数据"`
+	stockin.TopTenCirculatingHoldersGetTopTenCirculatingHoldersInp
+}
+
+type GetTopTenCirculatingHoldersRes struct {
+	Data *entity.TopTenCirculatingHolders `json:"data" dc:"返回数据"`
+}

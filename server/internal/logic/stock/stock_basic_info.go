@@ -144,3 +144,36 @@ func (s *sStockBasicInfo) View(ctx context.Context, in *stockin.StockBasicInfoVi
 	}
 	return
 }
+
+// GetStockBasicInfo 获取股票基础信息表数据
+func (s *sStockBasicInfo) GetStockBasicInfo(ctx context.Context, in *stockin.StockBasicInfoGetStockBasicInfoInp) (data interface{}, err error) {
+	// 构建 API URL
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/history/stockbasicinfo/%s/%s/%s", in.Symbol, in.Interval, in.AdjustType)
+
+	// 构建查询参数
+	params := g.Map{
+		"token": in.Token,
+	}
+
+	// 添加可选参数
+	if in.StartTime != "" {
+		params["st"] = in.StartTime
+	}
+	if in.EndTime != "" {
+		params["et"] = in.EndTime
+	}
+	if in.Limit > 0 {
+		params["lt"] = in.Limit
+	}
+
+	// 发送 GET 请求
+	var result interface{}
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	if err != nil {
+		err = gerror.Wrap(err, "调用外部API获取股票基础信息表数据失败，请稍后重试！")
+		return
+	}
+
+	data = result
+	return
+}

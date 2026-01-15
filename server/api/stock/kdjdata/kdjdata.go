@@ -7,6 +7,7 @@
 package kdjdata
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -58,7 +59,12 @@ type DeleteReq struct {
 
 type DeleteRes struct{}
 
+// GetKdjReq 获取KDJ随机指标数据
 type GetKdjReq struct {
-	g.Meta `path:"/kdjData/getKdj" method:"post" tags:"KDJ随机指标数据表" summary:"获取kdj api"`
-	stockin.KdjDataEditInp
+	g.Meta `path:"/kdjData/getKdj" method:"get" tags:"KDJ随机指标数据表" summary:"获取KDJ随机指标数据"`
+	stockin.KdjDataGetKdjInp
+}
+
+type GetKdjRes struct {
+	Data *entity.KdjData `json:"data" dc:"返回数据"`
 }

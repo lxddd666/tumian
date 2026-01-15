@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
@@ -137,5 +138,40 @@ func (s *sStockEnterpriseHistoricalData) View(ctx context.Context, in *stockin.E
 		err = gerror.Wrap(err, "获取企业级历史行情数据表 (K线数据)信息，请稍后重试！")
 		return
 	}
+	return
+}
+
+// GetEnterpriseHistoricalData 获取企业级历史行情数据表数据
+func (s *sStockEnterpriseHistoricalData) GetEnterpriseHistoricalData(ctx context.Context, in *stockin.EnterpriseHistoricalDataGetEnterpriseHistoricalDataInp) (data *entity.EnterpriseHistoricalData, err error) {
+	// 构建 API URL
+	// http://专属子域名.zhituapi.com/hs/hsstock/vip/股票代码.市场（如000001.SZ）/分时级别(如d)/除权方式(如n)?token=token证书&st=开始时间(如20240601)&et=结束时间(如20250430)&lt=最新条数(如100)
+	// 注意：专属子域名需要根据实际情况配置，这里使用 api 作为默认值
+	apiUrl := fmt.Sprintf("http://api.zhituapi.com/hs/hsstock/vip/%s/%s/%s", in.Symbol, in.Interval, in.AdjustType)
+
+	// 构建查询参数
+	params := g.Map{
+		"token": in.Token,
+	}
+
+	// 添加可选参数
+	if in.StartTime != "" {
+		params["st"] = in.StartTime
+	}
+	if in.EndTime != "" {
+		params["et"] = in.EndTime
+	}
+	if in.Limit > 0 {
+		params["lt"] = in.Limit
+	}
+
+	// 发送 GET 请求并解析为 entity.EnterpriseHistoricalData
+	var result entity.EnterpriseHistoricalData
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	if err != nil {
+		err = gerror.Wrap(err, "调用外部API获取企业级历史行情数据表数据失败，请稍后重试！")
+		return
+	}
+
+	data = &result
 	return
 }

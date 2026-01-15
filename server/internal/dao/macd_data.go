@@ -8,20 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// internalMacdDataDao is an internal type for wrapping the internal DAO implementation.
-type internalMacdDataDao = *internal.MacdDataDao
-
 // macdDataDao is the data access object for the table hg_macd_data.
 // You can define custom methods on it to extend its functionality as needed.
 type macdDataDao struct {
-	internalMacdDataDao
+	*internal.MacdDataDao
 }
 
 var (
 	// MacdData is a globally accessible object for table hg_macd_data operations.
-	MacdData = macdDataDao{
-		internal.NewMacdDataDao(),
-	}
+	MacdData = macdDataDao{internal.NewMacdDataDao()}
 )
 
 // Add your custom methods and functionality below.

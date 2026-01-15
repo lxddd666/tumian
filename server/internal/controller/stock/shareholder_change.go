@@ -29,7 +29,6 @@ func (c *cShareholderChange) List(ctx context.Context, req *shareholderchange.Li
 	if list == nil {
 		list = []*stockin.ShareholderChangeListModel{}
 	}
-
 	res = new(shareholderchange.ListRes)
 	res.List = list
 	res.PageRes.Pack(req, totalCount)
@@ -63,5 +62,17 @@ func (c *cShareholderChange) View(ctx context.Context, req *shareholderchange.Vi
 // Delete 删除股东户数变化记录表 (记录相邻报告期的户数变化)
 func (c *cShareholderChange) Delete(ctx context.Context, req *shareholderchange.DeleteReq) (res *shareholderchange.DeleteRes, err error) {
 	err = service.StockShareholderChange().Delete(ctx, &req.ShareholderChangeDeleteInp)
+	return
+}
+
+// GetShareholderChange 获取股东户数变化记录表数据
+func (c *cShareholderChange) GetShareholderChange(ctx context.Context, req *shareholderchange.GetShareholderChangeReq) (res *shareholderchange.GetShareholderChangeRes, err error) {
+	data, err := service.StockShareholderChange().GetShareholderChange(ctx, &req.ShareholderChangeGetShareholderChangeInp)
+	if err != nil {
+		return
+	}
+
+	res = new(shareholderchange.GetShareholderChangeRes)
+	res.Data = data
 	return
 }

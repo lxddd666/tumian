@@ -7,6 +7,7 @@
 package bolldata
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -57,3 +58,13 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetBollReq 获取布林带(BOLL)指标数据
+type GetBollReq struct {
+	g.Meta `path:"/bollData/getBoll" method:"get" tags:"布林带(BOLL)指标数据表" summary:"获取布林带(BOLL)指标数据"`
+	stockin.BollDataGetBollInp
+}
+
+type GetBollRes struct {
+	Data *entity.BollData `json:"data" dc:"返回数据"`
+}

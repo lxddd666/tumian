@@ -7,6 +7,7 @@
 package financialindicators
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -57,3 +58,13 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetFinancialIndicatorsReq 获取财务指标分析表数据
+type GetFinancialIndicatorsReq struct {
+	g.Meta `path:"/financialIndicators/getFinancialIndicators" method:"get" tags:"财务指标分析表" summary:"获取财务指标分析表数据"`
+	stockin.FinancialIndicatorsGetFinancialIndicatorsInp
+}
+
+type GetFinancialIndicatorsRes struct {
+	Data *entity.FinancialIndicators `json:"data" dc:"返回数据"`
+}

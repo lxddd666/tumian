@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
@@ -137,5 +138,28 @@ func (s *sStockTopTenCirculatingHolders) View(ctx context.Context, in *stockin.T
 		err = gerror.Wrap(err, "获取公司十大流通股东表 (数据来源于定期报告)[citation:4]信息，请稍后重试！")
 		return
 	}
+	return
+}
+
+// GetTopTenCirculatingHolders 获取公司十大流通股东表数据
+func (s *sStockTopTenCirculatingHolders) GetTopTenCirculatingHolders(ctx context.Context, in *stockin.TopTenCirculatingHoldersGetTopTenCirculatingHoldersInp) (data *entity.TopTenCirculatingHolders, err error) {
+	// 构建 API URL
+	// https://api.zhituapi.com/hs/gs/sdgd/股票代码?token=token证书
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/sdgd/%s", in.Symbol)
+
+	// 构建查询参数
+	params := g.Map{
+		"token": in.Token,
+	}
+
+	// 发送 GET 请求并解析为 entity.TopTenCirculatingHolders
+	var result entity.TopTenCirculatingHolders
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	if err != nil {
+		err = gerror.Wrap(err, "调用外部API获取公司十大流通股东表数据失败，请稍后重试！")
+		return
+	}
+
+	data = &result
 	return
 }
