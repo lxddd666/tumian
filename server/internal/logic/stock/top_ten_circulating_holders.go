@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
@@ -147,7 +148,8 @@ func (s *sStockTopTenCirculatingHolders) View(ctx context.Context, in *stockin.T
 func (s *sStockTopTenCirculatingHolders) GetTopTenCirculatingHolders(ctx context.Context, in *stockin.TopTenCirculatingHoldersGetTopTenCirculatingHoldersInp) (data []*entity.TopTenCirculatingHolders, err error) {
 	// 构建 API URL
 	// https://api.zhituapi.com/hs/gs/sdgd/股票代码?token=token证书
-	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/sdgd/%s", in.Symbol)
+	code := gstr.Split(in.Symbol, ".")[0]
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/ltgd/%s", code)
 
 	// 构建查询参数
 	params := g.Map{

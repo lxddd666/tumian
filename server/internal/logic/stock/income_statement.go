@@ -172,7 +172,8 @@ func (s *sStockIncomeStatement) GetIncomeStatement(ctx context.Context, in *stoc
 
 	// 发送 GET 请求并解析为 entity.IncomeStatement
 	var result []*entity.IncomeStatement
-	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	var da interface{}
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&da)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取利润表数据失败，请稍后重试！")
 		return

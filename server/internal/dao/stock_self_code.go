@@ -8,20 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// internalStockSelfCodeDao is an internal type for wrapping the internal DAO implementation.
-type internalStockSelfCodeDao = *internal.StockSelfCodeDao
-
 // stockSelfCodeDao is the data access object for the table hg_stock_self_code.
 // You can define custom methods on it to extend its functionality as needed.
 type stockSelfCodeDao struct {
-	internalStockSelfCodeDao
+	*internal.StockSelfCodeDao
 }
 
 var (
 	// StockSelfCode is a globally accessible object for table hg_stock_self_code operations.
-	StockSelfCode = stockSelfCodeDao{
-		internal.NewStockSelfCodeDao(),
-	}
+	StockSelfCode = stockSelfCodeDao{internal.NewStockSelfCodeDao()}
 )
 
 // Add your custom methods and functionality below.

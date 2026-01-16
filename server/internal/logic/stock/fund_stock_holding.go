@@ -9,7 +9,7 @@ package stock
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
@@ -145,7 +145,9 @@ func (s *sStockFundStockHolding) View(ctx context.Context, in *stockin.FundStock
 
 // GetFundStockHolding 获取基金持股明细表数据
 func (s *sStockFundStockHolding) GetFundStockHolding(ctx context.Context, in *stockin.FundStockHoldingGetFundStockHoldingInp) (data []*entity.FundStockHolding, err error) {
-	flag, err := s.Model(ctx).Where(dao.FundStockHolding.Columns().T, GetRecentWeekday()).Exist()
+	code := gstr.Split(in.Symbol, ".")[0]
+
+	flag, err := s.Model(ctx).Where(dao.FundStockHolding.Columns().T, GetRecentWeekday()).Where(dao.FundStockHolding.Columns().Symbol, in.Symbol).Exist()
 	if err != nil {
 		return
 	}
@@ -155,7 +157,7 @@ func (s *sStockFundStockHolding) GetFundStockHolding(ctx context.Context, in *st
 
 	// 构建 API URL
 	// https://api.zhituapi.com/hs/gs/jjcg/股票代码?token=token证书
-	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/jjcg/%s", in.Symbol)
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/jjcg/%s", code)
 
 	// 构建查询参数
 	params := g.Map{
@@ -171,8 +173,9 @@ func (s *sStockFundStockHolding) GetFundStockHolding(ctx context.Context, in *st
 	}
 	for _, re := range result {
 		re.Symbol = in.Symbol
-		dateStr := re.T.Format("Y-m-d")
-		re.T = gtime.NewFromStr(dateStr)
+		if re.T == nil {
+			re.T = re.Jzrq
+		}
 	}
 	data = result
 	if len(result) > 0 {

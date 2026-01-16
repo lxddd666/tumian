@@ -146,7 +146,7 @@ func (s *sStockMacdData) View(ctx context.Context, in *stockin.MacdDataViewInp) 
 
 // GetMacd 获取MACD指标数据
 func (s *sStockMacdData) GetMacd(ctx context.Context, in *stockin.MacdDataGetMacdInp) (data []*entity.MacdData, err error) {
-	flag, err := s.Model(ctx).Where(dao.MacdData.Columns().T, GetRecentWeekday()).Exist()
+	flag, err := s.Model(ctx).Where(dao.MacdData.Columns().T, GetRecentWeekday()).Where(dao.MacdData.Columns().Symbol, in.Symbol).Exist()
 	if err != nil {
 		return
 	}
@@ -170,10 +170,10 @@ func (s *sStockMacdData) GetMacd(ctx context.Context, in *stockin.MacdDataGetMac
 	}
 
 	// 添加可选参数
-	if in.StartTime != "" {
+	if in.StartTime == "" {
 		params["st"] = GetYewBefore(1)
 	}
-	if in.EndTime != "" {
+	if in.EndTime == "" {
 		params["et"] = GetNowDate()
 	}
 	if in.Limit <= 0 {

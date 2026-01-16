@@ -167,10 +167,10 @@ func (s *sStockBasicInfo) GetStockBasicInfo(ctx context.Context, in *stockin.Sto
 	}
 
 	// 添加可选参数
-	if in.StartTime != "" {
+	if in.StartTime == "" {
 		params["st"] = GetYewBefore(1)
 	}
-	if in.EndTime != "" {
+	if in.EndTime == "" {
 		params["et"] = GetNowDate()
 	}
 	if in.Limit <= 0 {

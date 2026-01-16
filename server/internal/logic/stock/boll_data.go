@@ -147,7 +147,7 @@ func (s *sStockBollData) View(ctx context.Context, in *stockin.BollDataViewInp) 
 
 // GetBoll 获取布林带(BOLL)指标数据
 func (s *sStockBollData) GetBoll(ctx context.Context, in *stockin.BollDataGetBollInp) (data []*entity.BollData, err error) {
-	flag, err := s.Model(ctx).Where(dao.BollData.Columns().T, GetRecentWeekday()).Exist()
+	flag, err := s.Model(ctx).Where(dao.BollData.Columns().T, GetRecentWeekday()).Where(dao.BollData.Columns().Symbol, in.Symbol).Exist()
 	if err != nil {
 		return
 	}
@@ -170,10 +170,10 @@ func (s *sStockBollData) GetBoll(ctx context.Context, in *stockin.BollDataGetBol
 	}
 
 	// 添加可选参数
-	if in.StartTime != "" {
+	if in.StartTime == "" {
 		params["st"] = GetYewBefore(1)
 	}
-	if in.EndTime != "" {
+	if in.EndTime == "" {
 		params["et"] = GetNowDate()
 	}
 	if in.Limit <= 0 {

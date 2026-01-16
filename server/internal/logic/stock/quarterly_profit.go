@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
@@ -155,7 +156,8 @@ func (s *sStockQuarterlyProfit) GetQuarterlyProfit(ctx context.Context, in *stoc
 
 	// 构建 API URL
 	// https://api.zhituapi.com/hs/gs/jdlr/股票代码?token=token证书
-	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/jdlr/%s", in.Symbol)
+	code := gstr.Split(in.Symbol, ".")[0]
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/jdlr/%s", code)
 
 	// 构建查询参数
 	params := g.Map{

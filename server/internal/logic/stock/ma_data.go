@@ -146,7 +146,7 @@ func (s *sStockMaData) View(ctx context.Context, in *stockin.MaDataViewInp) (res
 
 // GetMa 获取移动平均线(MA)指标数据
 func (s *sStockMaData) GetMa(ctx context.Context, in *stockin.MaDataGetMaInp) (data []*entity.MaData, err error) {
-	flag, err := s.Model(ctx).Where(dao.MaData.Columns().T, GetRecentWeekday()).Exist()
+	flag, err := s.Model(ctx).Where(dao.MaData.Columns().T, GetRecentWeekday()).Where(dao.MaData.Columns().Symbol, in.Symbol).Exist()
 	if err != nil {
 		return
 	}
@@ -170,10 +170,10 @@ func (s *sStockMaData) GetMa(ctx context.Context, in *stockin.MaDataGetMaInp) (d
 	}
 
 	// 添加可选参数
-	if in.StartTime != "" {
+	if in.StartTime == "" {
 		params["st"] = GetYewBefore(1)
 	}
-	if in.EndTime != "" {
+	if in.EndTime == "" {
 		params["et"] = GetNowDate()
 	}
 	if in.Limit <= 0 {

@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
@@ -155,7 +156,8 @@ func (s *sStockShareholderChange) GetShareholderChange(ctx context.Context, in *
 
 	// 构建 API URL
 	// https://api.zhituapi.com/hs/gs/gdbh/股票代码?token=token证书
-	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/gdbh/%s", in.Symbol)
+	code := gstr.Split(in.Symbol, ".")[0]
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/gdbh/%s", code)
 
 	// 构建查询参数
 	params := g.Map{

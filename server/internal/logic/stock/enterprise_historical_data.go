@@ -10,7 +10,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
-	"hotgo/internal/consts"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
@@ -146,7 +145,7 @@ func (s *sStockEnterpriseHistoricalData) View(ctx context.Context, in *stockin.E
 
 // GetEnterpriseHistoricalData 获取企业级历史行情数据表数据
 func (s *sStockEnterpriseHistoricalData) GetEnterpriseHistoricalData(ctx context.Context, in *stockin.EnterpriseHistoricalDataGetEnterpriseHistoricalDataInp) (data []*entity.EnterpriseHistoricalData, err error) {
-	flag, err := s.Model(ctx).Where(dao.EnterpriseHistoricalData.Columns().T, GetRecentWeekday()).Exist()
+	flag, err := s.Model(ctx).Where(dao.EnterpriseHistoricalData.Columns().T, GetRecentWeekday()).Where(dao.EnterpriseHistoricalData.Columns().Symbol, in.Symbol).Exist()
 	if err != nil {
 		return
 	}
@@ -160,10 +159,8 @@ func (s *sStockEnterpriseHistoricalData) GetEnterpriseHistoricalData(ctx context
 		in.AdjustType = "n"
 	}
 
-	// 构建 API URL
-	// http://专属子域名.zhituapi.com/hs/hsstock/vip/股票代码.市场（如000001.SZ）/分时级别(如d)/除权方式(如n)?token=token证书&st=开始时间(如20240601)&et=结束时间(如20250430)&lt=最新条数(如100)
-	// 注意：专属子域名需要根据实际情况配置，这里使用 api 作为默认值
-	apiUrl := fmt.Sprintf("http://api.zhituapi.com/hs/hsstock/vip/%s/%s/%s", in.Symbol, in.Interval, in.AdjustType)
+	// https://api.zhituapi.com/hs/history/股票代码.市场（如000001.SZ）/分时级别(如d)/除权方式?token=token证书&st=开始时间(如20240601)&et=结束时间(如20250430)
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/history/%s/%s/%s", in.Symbol, in.Interval, in.AdjustType)
 
 	// 构建查询参数
 	params := g.Map{
@@ -171,15 +168,15 @@ func (s *sStockEnterpriseHistoricalData) GetEnterpriseHistoricalData(ctx context
 	}
 
 	// 添加可选参数
-	if in.StartTime != "" {
+	if in.StartTime == "" {
 		params["st"] = GetYewBefore(1)
 	}
-	if in.EndTime != "" {
+	if in.EndTime == "" {
 		params["et"] = GetNowDate()
 	}
-	if in.Limit <= 0 {
-		params["lt"] = consts.StockLimitPiecesDefault
-	}
+	//if in.Limit <= 0 {
+	//	params["lt"] = consts.StockLimitPiecesDefault
+	//}
 
 	// 发送 GET 请求并解析为 entity.EnterpriseHistoricalData
 	var result []*entity.EnterpriseHistoricalData

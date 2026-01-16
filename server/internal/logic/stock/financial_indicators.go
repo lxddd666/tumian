@@ -9,7 +9,7 @@ package stock
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
@@ -146,9 +146,10 @@ func (s *sStockFinancialIndicators) View(ctx context.Context, in *stockin.Financ
 // GetFinancialIndicators 获取财务指标分析表数据
 func (s *sStockFinancialIndicators) GetFinancialIndicators(ctx context.Context, in *stockin.FinancialIndicatorsGetFinancialIndicatorsInp) (data []*entity.FinancialIndicators, err error) {
 
+	code := gstr.Split(in.Symbol, ".")[0]
 	// 构建 API URL
 	// https://api.zhituapi.com/hs/gs/cwzb/股票代码?token=token证书
-	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/cwzb/%s", in.Symbol)
+	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/cwzb/%s", code)
 
 	// 构建查询参数
 	params := g.Map{
@@ -160,16 +161,14 @@ func (s *sStockFinancialIndicators) GetFinancialIndicators(ctx context.Context, 
 	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取财务指标分析表数据失败，请稍后重试！")
+		fmt.Println(err)
 		return
 	}
 
 	data = result
 	for _, re := range result {
 		re.Symbol = in.Symbol
-		dateStr := re.Jzrq.Format("Y-m-d")
-		re.Jzrq = gtime.NewFromStr(dateStr)
-		dateStr = re.Plrq.Format("Y-m-d")
-		re.Plrq = gtime.NewFromStr(dateStr)
+
 	}
 	if len(result) > 0 {
 		_, err = s.Model(ctx).InsertIgnore(result)

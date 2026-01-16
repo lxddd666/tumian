@@ -109,22 +109,7 @@ func (in *FinancialIndicatorsEditInp) Filter(ctx context.Context) (err error) {
 	if err := g.Validator().Rules("required").Data(in.Symbol).Messages("公司代码/股票代码 (例如: 000001.SZ, AAPL)不能为空").Run(ctx); err != nil {
 		return err.Current()
 	}
-	// 验证截止日期 (报告期结束日)
-	if err := g.Validator().Rules("required").Data(in.Jzrq).Messages("截止日期 (报告期结束日)不能为空").Run(ctx); err != nil {
-		return err.Current()
-	}
-	// 验证披露日期
-	if err := g.Validator().Rules("required").Data(in.Plrq).Messages("披露日期不能为空").Run(ctx); err != nil {
-		return err.Current()
-	}
-	// 验证报告年度
-	if err := g.Validator().Rules("required").Data(in.ReportYear).Messages("报告年度不能为空").Run(ctx); err != nil {
-		return err.Current()
-	}
-	// 验证报告类型: annual-年报, quarter-季报
-	if err := g.Validator().Rules("required").Data(in.ReportType).Messages("报告类型: annual-年报, quarter-季报不能为空").Run(ctx); err != nil {
-		return err.Current()
-	}
+
 	return
 }
 

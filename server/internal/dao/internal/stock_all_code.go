@@ -13,9 +13,10 @@ import (
 
 // StockAllCodeDao is the data access object for the table hg_stock_all_code.
 type StockAllCodeDao struct {
-	table   string              // table is the underlying table name of the DAO.
-	group   string              // group is the database configuration group name of the current DAO.
-	columns StockAllCodeColumns // columns contains all the column names of Table for convenient usage.
+	table    string              // table is the underlying table name of the DAO.
+	group    string              // group is the database configuration group name of the current DAO.
+	columns  StockAllCodeColumns // columns contains all the column names of Table for convenient usage.
+	handlers []gdb.ModelHandler  // handlers for customized model modification.
 }
 
 // StockAllCodeColumns defines and stores column names for the table hg_stock_all_code.
@@ -35,11 +36,12 @@ var stockAllCodeColumns = StockAllCodeColumns{
 }
 
 // NewStockAllCodeDao creates and returns a new DAO object for table data access.
-func NewStockAllCodeDao() *StockAllCodeDao {
+func NewStockAllCodeDao(handlers ...gdb.ModelHandler) *StockAllCodeDao {
 	return &StockAllCodeDao{
-		group:   "default",
-		table:   "hg_stock_all_code",
-		columns: stockAllCodeColumns,
+		group:    "default",
+		table:    "hg_stock_all_code",
+		columns:  stockAllCodeColumns,
+		handlers: handlers,
 	}
 }
 
@@ -65,7 +67,11 @@ func (dao *StockAllCodeDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *StockAllCodeDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+	model := dao.DB().Model(dao.table)
+	for _, handler := range dao.handlers {
+		model = handler(model)
+	}
+	return model.Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

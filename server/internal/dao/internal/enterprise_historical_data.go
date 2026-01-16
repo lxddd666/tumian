@@ -21,64 +21,36 @@ type EnterpriseHistoricalDataDao struct {
 
 // EnterpriseHistoricalDataColumns defines and stores column names for the table hg_enterprise_historical_data.
 type EnterpriseHistoricalDataColumns struct {
-	Id            string // 自增主键
-	Symbol        string // 证券代码 (如: 000001.SZ, AAPL)
-	T             string // 交易时间 (精确到分钟或日)
-	Date          string // 交易日期 (衍生字段)
-	Year          string // 交易年份
-	Month         string // 交易月份
-	Weekday       string // 星期几 (1=周日,7=周六)
-	O             string // 开盘价
-	H             string // 最高价
-	L             string // 最低价
-	C             string // 收盘价
-	Pc            string // 前收盘价
-	V             string // 成交量 (股/手)
-	A             string // 成交额 (元)
-	Change        string // 涨跌额
-	ChangePct     string // 涨跌幅 (%)
-	Amplitude     string // 振幅 (%)
-	Sf            string // 停牌标志: 0-正常, 1-停牌
-	TradingStatus string // 交易状态描述
-	Period        string // 数据周期: 1min, 5min, 15min, 30min, 60min, day, week, month
-	IsAdjusted    string // 是否复权: 0-不复权, 1-前复权, 2-后复权
-	DataQuality   string // 数据质量: 0-异常, 1-正常, 2-补全
-	IsVerified    string // 是否已验证: 0-未验证, 1-已验证
-	DataSource    string // 数据来源
-	Version       string // 数据版本
-	CreatedAt     string // 创建时间
-	UpdatedAt     string // 更新时间
+	Id        string // 主键ID
+	Symbol    string // 公司代码/股票代码 (例如: 000001.SZ, AAPL)
+	T         string // 交易时间
+	O         string // 开盘价
+	H         string // 最高价
+	L         string // 最低价
+	C         string // 收盘价
+	V         string // 成交量
+	A         string // 成交额
+	Pc        string // 前收盘价
+	Sf        string // 停牌状态: 1停牌, 0不停牌
+	CreatedAt string // 创建时间
+	UpdatedAt string // 更新时间
 }
 
 // enterpriseHistoricalDataColumns holds the columns for the table hg_enterprise_historical_data.
 var enterpriseHistoricalDataColumns = EnterpriseHistoricalDataColumns{
-	Id:            "id",
-	Symbol:        "symbol",
-	T:             "t",
-	Date:          "date",
-	Year:          "year",
-	Month:         "month",
-	Weekday:       "weekday",
-	O:             "o",
-	H:             "h",
-	L:             "l",
-	C:             "c",
-	Pc:            "pc",
-	V:             "v",
-	A:             "a",
-	Change:        "change",
-	ChangePct:     "change_pct",
-	Amplitude:     "amplitude",
-	Sf:            "sf",
-	TradingStatus: "trading_status",
-	Period:        "period",
-	IsAdjusted:    "is_adjusted",
-	DataQuality:   "data_quality",
-	IsVerified:    "is_verified",
-	DataSource:    "data_source",
-	Version:       "version",
-	CreatedAt:     "created_at",
-	UpdatedAt:     "updated_at",
+	Id:        "id",
+	Symbol:    "symbol",
+	T:         "t",
+	O:         "o",
+	H:         "h",
+	L:         "l",
+	C:         "c",
+	V:         "v",
+	A:         "a",
+	Pc:        "pc",
+	Sf:        "sf",
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
 }
 
 // NewEnterpriseHistoricalDataDao creates and returns a new DAO object for table data access.

@@ -163,10 +163,10 @@ func (s *sStockShareholderCount) GetShareholderCount(ctx context.Context, in *st
 	}
 
 	// 添加可选参数
-	if in.StartTime != "" {
+	if in.StartTime == "" {
 		params["st"] = GetYewBefore(1)
 	}
-	if in.EndTime != "" {
+	if in.EndTime == "" {
 		params["et"] = GetNowDate()
 	}
 

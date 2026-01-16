@@ -63,6 +63,22 @@ type (
 		// GetFinancialIndicators 获取财务指标分析表数据
 		GetFinancialIndicators(ctx context.Context, in *stockin.FinancialIndicatorsGetFinancialIndicatorsInp) (data []*entity.FinancialIndicators, err error)
 	}
+	IStockFlowOfFunds interface {
+		// Model 资金流向明细表ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取资金流向明细表列表
+		List(ctx context.Context, in *stockin.FlowOfFundsListInp) (list []*stockin.FlowOfFundsListModel, totalCount int, err error)
+		// Export 导出资金流向明细表
+		Export(ctx context.Context, in *stockin.FlowOfFundsListInp) (err error)
+		// Edit 修改/新增资金流向明细表
+		Edit(ctx context.Context, in *stockin.FlowOfFundsEditInp) (err error)
+		// Delete 删除资金流向明细表
+		Delete(ctx context.Context, in *stockin.FlowOfFundsDeleteInp) (err error)
+		// View 获取资金流向明细表指定信息
+		View(ctx context.Context, in *stockin.FlowOfFundsViewInp) (res *stockin.FlowOfFundsViewModel, err error)
+		// GetFlowOfFunds 获取资金流向明细表数据
+		GetFlowOfFunds(ctx context.Context, in *stockin.GetFlowOfFundsInp) (data []*entity.FlowOfFunds, err error)
+	}
 	IStockFundStockHolding interface {
 		// Model 基金持股明细表 (来源于基金定期报告)ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -225,6 +241,16 @@ type (
 		// GetStockList 获取股票列表核心表数据
 		GetStockList(ctx context.Context, in *stockin.StockListGetStockListInp) (data []*entity.StockList, err error)
 	}
+	IStockSelfCode interface {
+		// Model 自选股票ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// SelfCodeIndicatorsApi 技术指标获取api获取（智兔api获取）
+		SelfCodeIndicatorsApi(ctx context.Context, in *stockin.SelfCodeIndicatorsApiInp) (err error)
+		// SelfStockWorkingCapitalInfoApi 运营资金情况（智兔api获取）
+		SelfStockWorkingCapitalInfoApi(ctx context.Context, in *stockin.SelfCodeIndicatorsApiInp) (err error)
+		// GetAllSelfCode 获取所有code
+		GetAllSelfCode(ctx context.Context) (list []*entity.StockSelfCode, err error)
+	}
 	IStockTopTenCirculatingHolders interface {
 		// Model 公司十大流通股东表 (数据来源于定期报告)[citation:4]ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -247,6 +273,7 @@ var (
 	localStockBollData                 IStockBollData
 	localStockEnterpriseHistoricalData IStockEnterpriseHistoricalData
 	localStockFinancialIndicators      IStockFinancialIndicators
+	localStockFlowOfFunds              IStockFlowOfFunds
 	localStockFundStockHolding         IStockFundStockHolding
 	localStockIncomeStatement          IStockIncomeStatement
 	localStockKdjData                  IStockKdjData
@@ -257,6 +284,7 @@ var (
 	localStockShareholderCount         IStockShareholderCount
 	localStockBasicInfo                IStockBasicInfo
 	localStockList                     IStockList
+	localStockSelfCode                 IStockSelfCode
 	localStockTopTenCirculatingHolders IStockTopTenCirculatingHolders
 )
 
@@ -291,6 +319,17 @@ func StockFinancialIndicators() IStockFinancialIndicators {
 
 func RegisterStockFinancialIndicators(i IStockFinancialIndicators) {
 	localStockFinancialIndicators = i
+}
+
+func StockFlowOfFunds() IStockFlowOfFunds {
+	if localStockFlowOfFunds == nil {
+		panic("implement not found for interface IStockFlowOfFunds, forgot register?")
+	}
+	return localStockFlowOfFunds
+}
+
+func RegisterStockFlowOfFunds(i IStockFlowOfFunds) {
+	localStockFlowOfFunds = i
 }
 
 func StockFundStockHolding() IStockFundStockHolding {
@@ -401,6 +440,17 @@ func StockList() IStockList {
 
 func RegisterStockList(i IStockList) {
 	localStockList = i
+}
+
+func StockSelfCode() IStockSelfCode {
+	if localStockSelfCode == nil {
+		panic("implement not found for interface IStockSelfCode, forgot register?")
+	}
+	return localStockSelfCode
+}
+
+func RegisterStockSelfCode(i IStockSelfCode) {
+	localStockSelfCode = i
 }
 
 func StockTopTenCirculatingHolders() IStockTopTenCirculatingHolders {

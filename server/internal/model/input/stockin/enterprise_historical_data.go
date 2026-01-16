@@ -90,9 +90,7 @@ func (in *EnterpriseHistoricalDataEditInp) Filter(ctx context.Context) (err erro
 		return err.Current()
 	}
 	// 验证数据周期: 1min, 5min, 15min, 30min, 60min, day, week, month
-	if err := g.Validator().Rules("required").Data(in.Period).Messages("数据周期: 1min, 5min, 15min, 30min, 60min, day, week, month不能为空").Run(ctx); err != nil {
-		return err.Current()
-	}
+
 	return
 }
 

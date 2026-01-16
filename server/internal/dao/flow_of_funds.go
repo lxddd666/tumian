@@ -8,15 +8,15 @@ import (
 	"hotgo/internal/dao/internal"
 )
 
-// stockAllCodeDao is the data access object for the table hg_stock_all_code.
+// flowOfFundsDao is the data access object for the table hg_flow_of_funds.
 // You can define custom methods on it to extend its functionality as needed.
-type stockAllCodeDao struct {
-	*internal.StockAllCodeDao
+type flowOfFundsDao struct {
+	*internal.FlowOfFundsDao
 }
 
 var (
-	// StockAllCode is a globally accessible object for table hg_stock_all_code operations.
-	StockAllCode = stockAllCodeDao{internal.NewStockAllCodeDao()}
+	// FlowOfFunds is a globally accessible object for table hg_flow_of_funds operations.
+	FlowOfFunds = flowOfFundsDao{internal.NewFlowOfFundsDao()}
 )
 
 // Add your custom methods and functionality below.
