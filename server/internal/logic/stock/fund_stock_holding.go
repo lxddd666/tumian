@@ -9,6 +9,7 @@ package stock
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
@@ -144,7 +145,7 @@ func (s *sStockFundStockHolding) View(ctx context.Context, in *stockin.FundStock
 
 // GetFundStockHolding 获取基金持股明细表数据
 func (s *sStockFundStockHolding) GetFundStockHolding(ctx context.Context, in *stockin.FundStockHoldingGetFundStockHoldingInp) (data []*entity.FundStockHolding, err error) {
-	flag, err := s.Model(ctx).Where(dao.FundStockHolding.Columns().T, GetNowDate()).Exist()
+	flag, err := s.Model(ctx).Where(dao.FundStockHolding.Columns().T, GetRecentWeekday()).Exist()
 	if err != nil {
 		return
 	}
@@ -168,7 +169,14 @@ func (s *sStockFundStockHolding) GetFundStockHolding(ctx context.Context, in *st
 		err = gerror.Wrap(err, "调用外部API获取基金持股明细表数据失败，请稍后重试！")
 		return
 	}
-
+	for _, re := range result {
+		re.Symbol = in.Symbol
+		dateStr := re.T.Format("Y-m-d")
+		re.T = gtime.NewFromStr(dateStr)
+	}
 	data = result
+	if len(result) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(result)
+	}
 	return
 }

@@ -20,6 +20,7 @@ import (
 	"hotgo/internal/service"
 	"hotgo/utility/convert"
 	"hotgo/utility/excel"
+	"time"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -146,7 +147,7 @@ func (s *sStockBollData) View(ctx context.Context, in *stockin.BollDataViewInp) 
 
 // GetBoll 获取布林带(BOLL)指标数据
 func (s *sStockBollData) GetBoll(ctx context.Context, in *stockin.BollDataGetBollInp) (data []*entity.BollData, err error) {
-	flag, err := s.Model(ctx).Where(dao.BollData.Columns().T, GetNowDate()).Exist()
+	flag, err := s.Model(ctx).Where(dao.BollData.Columns().T, GetRecentWeekday()).Exist()
 	if err != nil {
 		return
 	}
@@ -186,8 +187,16 @@ func (s *sStockBollData) GetBoll(ctx context.Context, in *stockin.BollDataGetBol
 		err = gerror.Wrap(err, "调用外部API获取布林带(BOLL)指标数据失败，请稍后重试！")
 		return
 	}
-
+	for _, re := range result {
+		re.Symbol = in.Symbol
+		dateStr := re.T.Format("Y-m-d")
+		re.T = gtime.NewFromStr(dateStr)
+		re.IntervalType = in.Interval
+	}
 	data = result
+	if len(result) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(result)
+	}
 	return
 }
 
@@ -200,4 +209,35 @@ func GetYewBefore(year int) string {
 		year = 1
 	}
 	return gtime.Now().AddDate(-year, 0, 0).Format("Ymd")
+}
+
+// GetRecentWeekday 返回最近的工作日（周一到周五），时间部分清零
+// 如果当天是工作日，返回当天；否则返回上一个工作日
+func GetRecentWeekday() string {
+	now := time.Now()
+	weekday := now.Weekday()
+
+	// 计算需要回溯的天数
+	daysToSubtract := 0
+
+	switch weekday {
+	case time.Saturday:
+		// 周六：回溯1天到周五
+		daysToSubtract = 1
+	case time.Sunday:
+		// 周日：回溯2天到周五
+		daysToSubtract = 2
+	default:
+		// 周一到周五：不需要回溯
+		daysToSubtract = 0
+	}
+
+	// 计算目标日期
+	targetDate := now.AddDate(0, 0, -daysToSubtract)
+
+	// 清零时间部分，只保留年月日
+	dateOnly := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(),
+		0, 0, 0, 0, targetDate.Location())
+
+	return gtime.NewFromTime(dateOnly).Format("Ymd")
 }

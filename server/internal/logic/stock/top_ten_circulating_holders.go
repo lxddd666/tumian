@@ -9,6 +9,7 @@ package stock
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
@@ -162,5 +163,17 @@ func (s *sStockTopTenCirculatingHolders) GetTopTenCirculatingHolders(ctx context
 	}
 
 	data = result
+
+	for _, re := range result {
+		re.Symbol = in.Symbol
+		dateStr := re.Jzrq.Format("Y-m-d")
+		re.Jzrq = gtime.NewFromStr(dateStr)
+		dateStr = re.Ggrq.Format("Y-m-d")
+		re.Ggrq = gtime.NewFromStr(dateStr)
+	}
+	data = result
+	if len(result) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(result)
+	}
 	return
 }

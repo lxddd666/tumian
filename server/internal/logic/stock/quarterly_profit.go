@@ -9,6 +9,7 @@ package stock
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
@@ -169,6 +170,14 @@ func (s *sStockQuarterlyProfit) GetQuarterlyProfit(ctx context.Context, in *stoc
 		return
 	}
 
+	for _, re := range result {
+		re.Symbol = in.Symbol
+		dateStr := re.Date.Format("Y-m-d")
+		re.Date = gtime.NewFromStr(dateStr)
+	}
 	data = result
+	if len(result) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(result)
+	}
 	return
 }

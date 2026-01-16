@@ -9,6 +9,7 @@ package stock
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
 	"hotgo/internal/consts"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
@@ -145,7 +146,7 @@ func (s *sStockEnterpriseHistoricalData) View(ctx context.Context, in *stockin.E
 
 // GetEnterpriseHistoricalData 获取企业级历史行情数据表数据
 func (s *sStockEnterpriseHistoricalData) GetEnterpriseHistoricalData(ctx context.Context, in *stockin.EnterpriseHistoricalDataGetEnterpriseHistoricalDataInp) (data []*entity.EnterpriseHistoricalData, err error) {
-	flag, err := s.Model(ctx).Where(dao.EnterpriseHistoricalData.Columns().T, GetNowDate()).Exist()
+	flag, err := s.Model(ctx).Where(dao.EnterpriseHistoricalData.Columns().T, GetRecentWeekday()).Exist()
 	if err != nil {
 		return
 	}
@@ -188,6 +189,14 @@ func (s *sStockEnterpriseHistoricalData) GetEnterpriseHistoricalData(ctx context
 		return
 	}
 
+	for _, re := range result {
+		re.Symbol = in.Symbol
+		dateStr := re.T.Format("Y-m-d")
+		re.T = gtime.NewFromStr(dateStr)
+	}
 	data = result
+	if len(result) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(result)
+	}
 	return
 }

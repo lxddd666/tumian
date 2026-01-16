@@ -186,5 +186,12 @@ func (s *sStockBasicInfo) GetStockBasicInfo(ctx context.Context, in *stockin.Sto
 	}
 
 	data = result
+	for _, re := range result {
+		re.Symbol = in.Symbol
+	}
+	data = result
+	if len(result) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(result)
+	}
 	return
 }

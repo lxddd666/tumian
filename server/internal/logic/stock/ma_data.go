@@ -9,6 +9,7 @@ package stock
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
 	"hotgo/internal/consts"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
@@ -145,7 +146,7 @@ func (s *sStockMaData) View(ctx context.Context, in *stockin.MaDataViewInp) (res
 
 // GetMa 获取移动平均线(MA)指标数据
 func (s *sStockMaData) GetMa(ctx context.Context, in *stockin.MaDataGetMaInp) (data []*entity.MaData, err error) {
-	flag, err := s.Model(ctx).Where(dao.MaData.Columns().T, GetNowDate()).Exist()
+	flag, err := s.Model(ctx).Where(dao.MaData.Columns().T, GetRecentWeekday()).Exist()
 	if err != nil {
 		return
 	}
@@ -187,6 +188,15 @@ func (s *sStockMaData) GetMa(ctx context.Context, in *stockin.MaDataGetMaInp) (d
 		return
 	}
 
+	for _, re := range result {
+		re.Symbol = in.Symbol
+		dateStr := re.T.Format("Y-m-d")
+		re.T = gtime.NewFromStr(dateStr)
+		re.IntervalType = in.Interval
+	}
 	data = result
+	if len(result) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(result)
+	}
 	return
 }

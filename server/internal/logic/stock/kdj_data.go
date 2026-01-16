@@ -9,6 +9,7 @@ package stock
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
 	"hotgo/internal/consts"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
@@ -145,7 +146,7 @@ func (s *sStockKdjData) View(ctx context.Context, in *stockin.KdjDataViewInp) (r
 
 // GetKdj 获取KDJ随机指标数据
 func (s *sStockKdjData) GetKdj(ctx context.Context, in *stockin.KdjDataGetKdjInp) (data []*entity.KdjData, err error) {
-	flag, err := s.Model(ctx).Where(dao.KdjData.Columns().T, GetNowDate()).Exist()
+	flag, err := s.Model(ctx).Where(dao.KdjData.Columns().T, GetRecentWeekday()).Exist()
 	if err != nil {
 		return
 	}
@@ -188,5 +189,14 @@ func (s *sStockKdjData) GetKdj(ctx context.Context, in *stockin.KdjDataGetKdjInp
 	}
 
 	data = result
+	for _, re := range result {
+		re.Symbol = in.Symbol
+		dateStr := re.T.Format("Y-m-d")
+		re.T = gtime.NewFromStr(dateStr)
+		re.IntervalType = in.Interval
+	}
+	if len(result) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(result)
+	}
 	return
 }

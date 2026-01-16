@@ -214,5 +214,12 @@ func (s *sStockList) GetStockList(ctx context.Context, in *stockin.StockListGetS
 	}
 
 	data = result
+	for _, re := range result {
+		re.Symbol = in.Symbol
+	}
+	data = result
+	if len(result) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(result)
+	}
 	return
 }

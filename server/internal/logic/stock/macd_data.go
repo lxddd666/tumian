@@ -9,6 +9,7 @@ package stock
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
 	"hotgo/internal/consts"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
@@ -145,7 +146,7 @@ func (s *sStockMacdData) View(ctx context.Context, in *stockin.MacdDataViewInp) 
 
 // GetMacd 获取MACD指标数据
 func (s *sStockMacdData) GetMacd(ctx context.Context, in *stockin.MacdDataGetMacdInp) (data []*entity.MacdData, err error) {
-	flag, err := s.Model(ctx).Where(dao.MacdData.Columns().T, GetNowDate()).Exist()
+	flag, err := s.Model(ctx).Where(dao.MacdData.Columns().T, GetRecentWeekday()).Exist()
 	if err != nil {
 		return
 	}
@@ -187,6 +188,15 @@ func (s *sStockMacdData) GetMacd(ctx context.Context, in *stockin.MacdDataGetMac
 		return
 	}
 
+	for _, re := range result {
+		re.Symbol = in.Symbol
+		dateStr := re.T.Format("Y-m-d")
+		re.T = gtime.NewFromStr(dateStr)
+		re.IntervalType = in.Interval
+	}
 	data = result
+	if len(result) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(result)
+	}
 	return
 }
