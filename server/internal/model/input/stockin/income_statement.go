@@ -365,7 +365,7 @@ type IncomeStatementExportModel struct {
 // IncomeStatementGetIncomeStatementInp 获取利润表数据
 type IncomeStatementGetIncomeStatementInp struct {
 	Symbol    string `json:"symbol" v:"required#股票代码不能为空" dc:"股票代码 (例如: 000001.SZ)"`
-	Token     string `json:"token" v:"required#token证书不能为空" dc:"token证书"`
+	Token     string `json:"token"  dc:"token证书"`
 	StartTime string `json:"st" dc:"开始时间"`
 	EndTime   string `json:"et" dc:"结束时间"`
 }

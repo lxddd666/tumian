@@ -153,7 +153,7 @@ type FundStockHoldingExportModel struct {
 // FundStockHoldingGetFundStockHoldingInp 获取基金持股明细表数据
 type FundStockHoldingGetFundStockHoldingInp struct {
 	Symbol string `json:"symbol" v:"required#股票代码不能为空" dc:"股票代码 (例如: 000001.SZ)"`
-	Token  string `json:"token" v:"required#token证书不能为空" dc:"token证书"`
+	Token  string `json:"token"  dc:"token证书"`
 }
 
 func (in *FundStockHoldingGetFundStockHoldingInp) Filter(ctx context.Context) (err error) {
