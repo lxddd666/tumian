@@ -66,5 +66,5 @@ type GetTopTenCirculatingHoldersReq struct {
 }
 
 type GetTopTenCirculatingHoldersRes struct {
-	Data *entity.TopTenCirculatingHolders `json:"data" dc:"返回数据"`
+	Data []*entity.TopTenCirculatingHolders `json:"data" dc:"返回数据"`
 }

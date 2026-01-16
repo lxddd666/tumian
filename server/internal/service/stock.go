@@ -29,7 +29,7 @@ type (
 		// View 获取布林带(BOLL)指标数据表指定信息
 		View(ctx context.Context, in *stockin.BollDataViewInp) (res *stockin.BollDataViewModel, err error)
 		// GetBoll 获取布林带(BOLL)指标数据
-		GetBoll(ctx context.Context, in *stockin.BollDataGetBollInp) (data *entity.BollData, err error)
+		GetBoll(ctx context.Context, in *stockin.BollDataGetBollInp) (data []*entity.BollData, err error)
 	}
 	IStockEnterpriseHistoricalData interface {
 		// Model 企业级历史行情数据表 (K线数据)ORM模型
@@ -45,7 +45,7 @@ type (
 		// View 获取企业级历史行情数据表 (K线数据)指定信息
 		View(ctx context.Context, in *stockin.EnterpriseHistoricalDataViewInp) (res *stockin.EnterpriseHistoricalDataViewModel, err error)
 		// GetEnterpriseHistoricalData 获取企业级历史行情数据表数据
-		GetEnterpriseHistoricalData(ctx context.Context, in *stockin.EnterpriseHistoricalDataGetEnterpriseHistoricalDataInp) (data *entity.EnterpriseHistoricalData, err error)
+		GetEnterpriseHistoricalData(ctx context.Context, in *stockin.EnterpriseHistoricalDataGetEnterpriseHistoricalDataInp) (data []*entity.EnterpriseHistoricalData, err error)
 	}
 	IStockFinancialIndicators interface {
 		// Model 财务指标分析表ORM模型
@@ -61,7 +61,7 @@ type (
 		// View 获取财务指标分析表指定信息
 		View(ctx context.Context, in *stockin.FinancialIndicatorsViewInp) (res *stockin.FinancialIndicatorsViewModel, err error)
 		// GetFinancialIndicators 获取财务指标分析表数据
-		GetFinancialIndicators(ctx context.Context, in *stockin.FinancialIndicatorsGetFinancialIndicatorsInp) (data *entity.FinancialIndicators, err error)
+		GetFinancialIndicators(ctx context.Context, in *stockin.FinancialIndicatorsGetFinancialIndicatorsInp) (data []*entity.FinancialIndicators, err error)
 	}
 	IStockFundStockHolding interface {
 		// Model 基金持股明细表 (来源于基金定期报告)ORM模型
@@ -77,7 +77,7 @@ type (
 		// View 获取基金持股明细表 (来源于基金定期报告)指定信息
 		View(ctx context.Context, in *stockin.FundStockHoldingViewInp) (res *stockin.FundStockHoldingViewModel, err error)
 		// GetFundStockHolding 获取基金持股明细表数据
-		GetFundStockHolding(ctx context.Context, in *stockin.FundStockHoldingGetFundStockHoldingInp) (data *entity.FundStockHolding, err error)
+		GetFundStockHolding(ctx context.Context, in *stockin.FundStockHoldingGetFundStockHoldingInp) (data []*entity.FundStockHolding, err error)
 	}
 	IStockIncomeStatement interface {
 		// Model 利润表 (Income Statement)ORM模型
@@ -93,7 +93,7 @@ type (
 		// View 获取利润表 (Income Statement)指定信息
 		View(ctx context.Context, in *stockin.IncomeStatementViewInp) (res *stockin.IncomeStatementViewModel, err error)
 		// GetIncomeStatement 获取利润表数据
-		GetIncomeStatement(ctx context.Context, in *stockin.IncomeStatementGetIncomeStatementInp) (data *entity.IncomeStatement, err error)
+		GetIncomeStatement(ctx context.Context, in *stockin.IncomeStatementGetIncomeStatementInp) (data []*entity.IncomeStatement, err error)
 	}
 	IStockKdjData interface {
 		// Model KDJ随机指标数据表ORM模型
@@ -109,7 +109,7 @@ type (
 		// View 获取KDJ随机指标数据表指定信息
 		View(ctx context.Context, in *stockin.KdjDataViewInp) (res *stockin.KdjDataViewModel, err error)
 		// GetKdj 获取KDJ随机指标数据
-		GetKdj(ctx context.Context, in *stockin.KdjDataGetKdjInp) (data *entity.KdjData, err error)
+		GetKdj(ctx context.Context, in *stockin.KdjDataGetKdjInp) (data []*entity.KdjData, err error)
 	}
 	IStockMaData interface {
 		// Model 移动平均线(MA)指标数据表ORM模型
@@ -125,7 +125,7 @@ type (
 		// View 获取移动平均线(MA)指标数据表指定信息
 		View(ctx context.Context, in *stockin.MaDataViewInp) (res *stockin.MaDataViewModel, err error)
 		// GetMa 获取移动平均线(MA)指标数据
-		GetMa(ctx context.Context, in *stockin.MaDataGetMaInp) (data *entity.MaData, err error)
+		GetMa(ctx context.Context, in *stockin.MaDataGetMaInp) (data []*entity.MaData, err error)
 	}
 	IStockMacdData interface {
 		// Model MACD指标数据表ORM模型
@@ -141,7 +141,7 @@ type (
 		// View 获取MACD指标数据表指定信息
 		View(ctx context.Context, in *stockin.MacdDataViewInp) (res *stockin.MacdDataViewModel, err error)
 		// GetMacd 获取MACD指标数据
-		GetMacd(ctx context.Context, in *stockin.MacdDataGetMacdInp) (data *entity.MacdData, err error)
+		GetMacd(ctx context.Context, in *stockin.MacdDataGetMacdInp) (data []*entity.MacdData, err error)
 	}
 	IStockQuarterlyProfit interface {
 		// Model 季度利润数据表 (近一年各季度)ORM模型
@@ -157,7 +157,7 @@ type (
 		// View 获取季度利润数据表 (近一年各季度)指定信息
 		View(ctx context.Context, in *stockin.QuarterlyProfitViewInp) (res *stockin.QuarterlyProfitViewModel, err error)
 		// GetQuarterlyProfit 获取季度利润数据表数据
-		GetQuarterlyProfit(ctx context.Context, in *stockin.QuarterlyProfitGetQuarterlyProfitInp) (data *entity.QuarterlyProfit, err error)
+		GetQuarterlyProfit(ctx context.Context, in *stockin.QuarterlyProfitGetQuarterlyProfitInp) (data []*entity.QuarterlyProfit, err error)
 	}
 	IStockShareholderChange interface {
 		// Model 股东户数变化记录表 (记录相邻报告期的户数变化)ORM模型
@@ -173,7 +173,7 @@ type (
 		// View 获取股东户数变化记录表 (记录相邻报告期的户数变化)指定信息
 		View(ctx context.Context, in *stockin.ShareholderChangeViewInp) (res *stockin.ShareholderChangeViewModel, err error)
 		// GetShareholderChange 获取股东户数变化记录表数据
-		GetShareholderChange(ctx context.Context, in *stockin.ShareholderChangeGetShareholderChangeInp) (data *entity.ShareholderChange, err error)
+		GetShareholderChange(ctx context.Context, in *stockin.ShareholderChangeGetShareholderChangeInp) (data []*entity.ShareholderChange, err error)
 	}
 	IStockShareholderCount interface {
 		// Model 公司股东户数统计表 (按报告期统计)ORM模型
@@ -189,7 +189,7 @@ type (
 		// View 获取公司股东户数统计表 (按报告期统计)指定信息
 		View(ctx context.Context, in *stockin.ShareholderCountViewInp) (res *stockin.ShareholderCountViewModel, err error)
 		// GetShareholderCount 获取公司股东户数统计表数据
-		GetShareholderCount(ctx context.Context, in *stockin.ShareholderCountGetShareholderCountInp) (data *entity.ShareholderCount, err error)
+		GetShareholderCount(ctx context.Context, in *stockin.ShareholderCountGetShareholderCountInp) (data []*entity.ShareholderCount, err error)
 	}
 	IStockBasicInfo interface {
 		// Model 股票基础信息表ORM模型
@@ -205,7 +205,7 @@ type (
 		// View 获取股票基础信息表指定信息
 		View(ctx context.Context, in *stockin.StockBasicInfoViewInp) (res *stockin.StockBasicInfoViewModel, err error)
 		// GetStockBasicInfo 获取股票基础信息表数据
-		GetStockBasicInfo(ctx context.Context, in *stockin.StockBasicInfoGetStockBasicInfoInp) (data interface{}, err error)
+		GetStockBasicInfo(ctx context.Context, in *stockin.StockBasicInfoGetStockBasicInfoInp) (data []*entity.StockBasicInfo, err error)
 	}
 	IStockList interface {
 		// Model 股票列表核心表ORM模型
@@ -223,7 +223,7 @@ type (
 		// Status 更新股票列表核心表状态
 		Status(ctx context.Context, in *stockin.StockListStatusInp) (err error)
 		// GetStockList 获取股票列表核心表数据
-		GetStockList(ctx context.Context, in *stockin.StockListGetStockListInp) (data *entity.StockList, err error)
+		GetStockList(ctx context.Context, in *stockin.StockListGetStockListInp) (data []*entity.StockList, err error)
 	}
 	IStockTopTenCirculatingHolders interface {
 		// Model 公司十大流通股东表 (数据来源于定期报告)[citation:4]ORM模型
@@ -239,7 +239,7 @@ type (
 		// View 获取公司十大流通股东表 (数据来源于定期报告)[citation:4]指定信息
 		View(ctx context.Context, in *stockin.TopTenCirculatingHoldersViewInp) (res *stockin.TopTenCirculatingHoldersViewModel, err error)
 		// GetTopTenCirculatingHolders 获取公司十大流通股东表数据
-		GetTopTenCirculatingHolders(ctx context.Context, in *stockin.TopTenCirculatingHoldersGetTopTenCirculatingHoldersInp) (data *entity.TopTenCirculatingHolders, err error)
+		GetTopTenCirculatingHolders(ctx context.Context, in *stockin.TopTenCirculatingHoldersGetTopTenCirculatingHoldersInp) (data []*entity.TopTenCirculatingHolders, err error)
 	}
 )
 

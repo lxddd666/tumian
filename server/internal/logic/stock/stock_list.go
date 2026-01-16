@@ -9,7 +9,9 @@ package stock
 import (
 	"context"
 	"fmt"
+	"hotgo/internal/consts"
 	"hotgo/internal/dao"
+	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm"
 	"hotgo/internal/library/hgorm/handler"
 	"hotgo/internal/model/entity"
@@ -167,7 +169,21 @@ func (s *sStockList) Status(ctx context.Context, in *stockin.StockListStatusInp)
 }
 
 // GetStockList 获取股票列表核心表数据
-func (s *sStockList) GetStockList(ctx context.Context, in *stockin.StockListGetStockListInp) (data *entity.StockList, err error) {
+func (s *sStockList) GetStockList(ctx context.Context, in *stockin.StockListGetStockListInp) (data []*entity.StockList, err error) {
+	//flag, err := s.Model(ctx).Where(dao.StockList.Columns().T, GetNowDate()).Exist()
+	//if err != nil {
+	//	return
+	//}
+	//if flag {
+	//	return
+	//}
+	if in.Interval == "" {
+		in.Interval = "d"
+	}
+	if in.AdjustType == "" {
+		in.AdjustType = "n"
+	}
+
 	// 构建 API URL
 	// http://专属子域名.zhituapi.com/hs/hsstock/vip/股票代码.市场（如000001.SZ）/分时级别(如d)/除权方式(如n)?token=token证书&st=开始时间(如20240601)&et=结束时间(如20250430)&lt=最新条数(如100)
 	// 注意：专属子域名需要根据实际情况配置，这里使用 api 作为默认值
@@ -175,28 +191,28 @@ func (s *sStockList) GetStockList(ctx context.Context, in *stockin.StockListGetS
 
 	// 构建查询参数
 	params := g.Map{
-		"token": in.Token,
+		"token": global.StockToken,
 	}
 
 	// 添加可选参数
 	if in.StartTime != "" {
-		params["st"] = in.StartTime
+		params["st"] = GetYewBefore(1)
 	}
 	if in.EndTime != "" {
-		params["et"] = in.EndTime
+		params["et"] = GetNowDate()
 	}
-	if in.Limit > 0 {
-		params["lt"] = in.Limit
+	if in.Limit <= 0 {
+		params["lt"] = consts.StockLimitPiecesDefault
 	}
 
 	// 发送 GET 请求并解析为 entity.StockList
-	var result entity.StockList
+	var result []*entity.StockList
 	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取股票列表核心表数据失败，请稍后重试！")
 		return
 	}
 
-	data = &result
+	data = result
 	return
 }

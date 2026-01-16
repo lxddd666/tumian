@@ -66,5 +66,5 @@ type GetQuarterlyProfitReq struct {
 }
 
 type GetQuarterlyProfitRes struct {
-	Data *entity.QuarterlyProfit `json:"data" dc:"返回数据"`
+	Data []*entity.QuarterlyProfit `json:"data" dc:"返回数据"`
 }

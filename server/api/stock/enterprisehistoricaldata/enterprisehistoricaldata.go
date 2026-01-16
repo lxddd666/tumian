@@ -66,5 +66,5 @@ type GetEnterpriseHistoricalDataReq struct {
 }
 
 type GetEnterpriseHistoricalDataRes struct {
-	Data *entity.EnterpriseHistoricalData `json:"data" dc:"返回数据"`
+	Data []*entity.EnterpriseHistoricalData `json:"data" dc:"返回数据"`
 }

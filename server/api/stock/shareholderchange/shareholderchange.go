@@ -66,5 +66,5 @@ type GetShareholderChangeReq struct {
 }
 
 type GetShareholderChangeRes struct {
-	Data *entity.ShareholderChange `json:"data" dc:"返回数据"`
+	Data []*entity.ShareholderChange `json:"data" dc:"返回数据"`
 }

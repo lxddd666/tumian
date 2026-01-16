@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"hotgo/internal/dao"
+	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
 	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
@@ -142,32 +143,40 @@ func (s *sStockIncomeStatement) View(ctx context.Context, in *stockin.IncomeStat
 }
 
 // GetIncomeStatement 获取利润表数据
-func (s *sStockIncomeStatement) GetIncomeStatement(ctx context.Context, in *stockin.IncomeStatementGetIncomeStatementInp) (data *entity.IncomeStatement, err error) {
+func (s *sStockIncomeStatement) GetIncomeStatement(ctx context.Context, in *stockin.IncomeStatementGetIncomeStatementInp) (data []*entity.IncomeStatement, err error) {
+	//flag, err := s.Model(ctx).Where(dao.IncomeStatement.Columns().T, GetNowDate()).Exist()
+	//if err != nil {
+	//	return
+	//}
+	//if flag {
+	//	return
+	//}
+
 	// 构建 API URL
 	// https://api.zhituapi.com/hs/fin/income/股票代码（如000001.SZ）?token=token证书&st=开始时间&et=结束时间
 	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/fin/income/%s", in.Symbol)
 
 	// 构建查询参数
 	params := g.Map{
-		"token": in.Token,
+		"token": global.StockToken,
 	}
 
 	// 添加可选参数
 	if in.StartTime != "" {
-		params["st"] = in.StartTime
+		params["st"] = GetYewBefore(1)
 	}
 	if in.EndTime != "" {
-		params["et"] = in.EndTime
+		params["et"] = GetNowDate()
 	}
 
 	// 发送 GET 请求并解析为 entity.IncomeStatement
-	var result entity.IncomeStatement
+	var result []*entity.IncomeStatement
 	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取利润表数据失败，请稍后重试！")
 		return
 	}
 
-	data = &result
+	data = result
 	return
 }

@@ -60,6 +60,12 @@ func Init(ctx context.Context) {
 
 	// 订阅集群同步
 	SubscribeClusterSync(ctx)
+
+	InitStockToken(ctx)
+}
+
+func InitStockToken(ctx context.Context) {
+	_ = g.Cfg().MustGet(ctx, "zhitu.token").Scan(&StockToken)
 }
 
 // LoggingServeLogHandler 服务日志处理

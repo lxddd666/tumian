@@ -66,5 +66,5 @@ type GetBollReq struct {
 }
 
 type GetBollRes struct {
-	Data *entity.BollData `json:"data" dc:"返回数据"`
+	Data []*entity.BollData `json:"data" dc:"返回数据"`
 }

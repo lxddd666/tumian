@@ -66,5 +66,5 @@ type GetShareholderCountReq struct {
 }
 
 type GetShareholderCountRes struct {
-	Data *entity.ShareholderCount `json:"data" dc:"返回数据"`
+	Data []*entity.ShareholderCount `json:"data" dc:"返回数据"`
 }

@@ -9,7 +9,9 @@ package stock
 import (
 	"context"
 	"fmt"
+	"hotgo/internal/consts"
 	"hotgo/internal/dao"
+	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
 	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
@@ -142,35 +144,49 @@ func (s *sStockMacdData) View(ctx context.Context, in *stockin.MacdDataViewInp) 
 }
 
 // GetMacd 获取MACD指标数据
-func (s *sStockMacdData) GetMacd(ctx context.Context, in *stockin.MacdDataGetMacdInp) (data *entity.MacdData, err error) {
+func (s *sStockMacdData) GetMacd(ctx context.Context, in *stockin.MacdDataGetMacdInp) (data []*entity.MacdData, err error) {
+	flag, err := s.Model(ctx).Where(dao.MacdData.Columns().T, GetNowDate()).Exist()
+	if err != nil {
+		return
+	}
+	if flag {
+		return
+	}
+	if in.Interval == "" {
+		in.Interval = "d"
+	}
+	if in.AdjustType == "" {
+		in.AdjustType = "n"
+	}
+
 	// 构建 API URL
 	// https://api.zhituapi.com/hs/history/macd/股票代码(如000001.SZ)/分时级别(如d)/除权类型(如n)?token=token证书&st=开始时间&et=结束时间&lt=最新条数
 	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/history/macd/%s/%s/%s", in.Symbol, in.Interval, in.AdjustType)
 
 	// 构建查询参数
 	params := g.Map{
-		"token": in.Token,
+		"token": global.StockToken,
 	}
 
 	// 添加可选参数
 	if in.StartTime != "" {
-		params["st"] = in.StartTime
+		params["st"] = GetYewBefore(1)
 	}
 	if in.EndTime != "" {
-		params["et"] = in.EndTime
+		params["et"] = GetNowDate()
 	}
-	if in.Limit > 0 {
-		params["lt"] = in.Limit
+	if in.Limit <= 0 {
+		params["lt"] = consts.StockLimitPiecesDefault
 	}
 
 	// 发送 GET 请求并解析为 entity.MacdData
-	var result entity.MacdData
+	var result []*entity.MacdData
 	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取MACD指标数据失败，请稍后重试！")
 		return
 	}
 
-	data = &result
+	data = result
 	return
 }

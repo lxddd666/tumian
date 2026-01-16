@@ -66,5 +66,5 @@ type GetMacdReq struct {
 }
 
 type GetMacdRes struct {
-	Data *entity.MacdData `json:"data" dc:"返回数据"`
+	Data []*entity.MacdData `json:"data" dc:"返回数据"`
 }

@@ -66,5 +66,5 @@ type GetKdjReq struct {
 }
 
 type GetKdjRes struct {
-	Data *entity.KdjData `json:"data" dc:"返回数据"`
+	Data []*entity.KdjData `json:"data" dc:"返回数据"`
 }

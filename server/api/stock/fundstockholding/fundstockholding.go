@@ -66,5 +66,5 @@ type GetFundStockHoldingReq struct {
 }
 
 type GetFundStockHoldingRes struct {
-	Data *entity.FundStockHolding `json:"data" dc:"返回数据"`
+	Data []*entity.FundStockHolding `json:"data" dc:"返回数据"`
 }

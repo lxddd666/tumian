@@ -74,5 +74,5 @@ type GetStockListReq struct {
 }
 
 type GetStockListRes struct {
-	Data *entity.StockList `json:"data" dc:"返回数据"`
+	Data []*entity.StockList `json:"data" dc:"返回数据"`
 }

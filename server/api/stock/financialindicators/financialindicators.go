@@ -66,5 +66,5 @@ type GetFinancialIndicatorsReq struct {
 }
 
 type GetFinancialIndicatorsRes struct {
-	Data *entity.FinancialIndicators `json:"data" dc:"返回数据"`
+	Data []*entity.FinancialIndicators `json:"data" dc:"返回数据"`
 }

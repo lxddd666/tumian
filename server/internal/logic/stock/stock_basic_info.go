@@ -9,9 +9,12 @@ package stock
 import (
 	"context"
 	"fmt"
+	"hotgo/internal/consts"
 	"hotgo/internal/dao"
+	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm"
 	"hotgo/internal/library/hgorm/handler"
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
@@ -146,28 +149,36 @@ func (s *sStockBasicInfo) View(ctx context.Context, in *stockin.StockBasicInfoVi
 }
 
 // GetStockBasicInfo 获取股票基础信息表数据
-func (s *sStockBasicInfo) GetStockBasicInfo(ctx context.Context, in *stockin.StockBasicInfoGetStockBasicInfoInp) (data interface{}, err error) {
+func (s *sStockBasicInfo) GetStockBasicInfo(ctx context.Context, in *stockin.StockBasicInfoGetStockBasicInfoInp) (data []*entity.StockBasicInfo, err error) {
+
+	if in.Interval == "" {
+		in.Interval = "d"
+	}
+	if in.AdjustType == "" {
+		in.AdjustType = "n"
+	}
+
 	// 构建 API URL
 	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/history/stockbasicinfo/%s/%s/%s", in.Symbol, in.Interval, in.AdjustType)
 
 	// 构建查询参数
 	params := g.Map{
-		"token": in.Token,
+		"token": global.StockToken,
 	}
 
 	// 添加可选参数
 	if in.StartTime != "" {
-		params["st"] = in.StartTime
+		params["st"] = GetYewBefore(1)
 	}
 	if in.EndTime != "" {
-		params["et"] = in.EndTime
+		params["et"] = GetNowDate()
 	}
-	if in.Limit > 0 {
-		params["lt"] = in.Limit
+	if in.Limit <= 0 {
+		params["lt"] = consts.StockLimitPiecesDefault
 	}
 
-	// 发送 GET 请求
-	var result interface{}
+	// 发送 GET 请求并解析为 entity.StockBasicInfo
+	var result []*entity.StockBasicInfo
 	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取股票基础信息表数据失败，请稍后重试！")

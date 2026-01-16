@@ -66,5 +66,5 @@ type GetIncomeStatementReq struct {
 }
 
 type GetIncomeStatementRes struct {
-	Data *entity.IncomeStatement `json:"data" dc:"返回数据"`
+	Data []*entity.IncomeStatement `json:"data" dc:"返回数据"`
 }

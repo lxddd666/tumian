@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"hotgo/internal/dao"
+	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
 	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
@@ -142,24 +143,32 @@ func (s *sStockFundStockHolding) View(ctx context.Context, in *stockin.FundStock
 }
 
 // GetFundStockHolding 获取基金持股明细表数据
-func (s *sStockFundStockHolding) GetFundStockHolding(ctx context.Context, in *stockin.FundStockHoldingGetFundStockHoldingInp) (data *entity.FundStockHolding, err error) {
+func (s *sStockFundStockHolding) GetFundStockHolding(ctx context.Context, in *stockin.FundStockHoldingGetFundStockHoldingInp) (data []*entity.FundStockHolding, err error) {
+	flag, err := s.Model(ctx).Where(dao.FundStockHolding.Columns().T, GetNowDate()).Exist()
+	if err != nil {
+		return
+	}
+	if flag {
+		return
+	}
+
 	// 构建 API URL
 	// https://api.zhituapi.com/hs/gs/jjcg/股票代码?token=token证书
 	apiUrl := fmt.Sprintf("https://api.zhituapi.com/hs/gs/jjcg/%s", in.Symbol)
 
 	// 构建查询参数
 	params := g.Map{
-		"token": in.Token,
+		"token": global.StockToken,
 	}
 
 	// 发送 GET 请求并解析为 entity.FundStockHolding
-	var result entity.FundStockHolding
+	var result []*entity.FundStockHolding
 	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取基金持股明细表数据失败，请稍后重试！")
 		return
 	}
 
-	data = &result
+	data = result
 	return
 }

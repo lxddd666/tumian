@@ -66,5 +66,5 @@ type GetMaReq struct {
 }
 
 type GetMaRes struct {
-	Data *entity.MaData `json:"data" dc:"返回数据"`
+	Data []*entity.MaData `json:"data" dc:"返回数据"`
 }

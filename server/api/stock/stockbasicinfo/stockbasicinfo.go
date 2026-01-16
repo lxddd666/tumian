@@ -7,6 +7,7 @@
 package stockbasicinfo
 
 import (
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 
@@ -65,5 +66,5 @@ type GetStockBasicInfoReq struct {
 }
 
 type GetStockBasicInfoRes struct {
-	Data interface{} `json:"data" dc:"返回数据"`
+	Data []*entity.StockBasicInfo `json:"data" dc:"返回数据"`
 }
