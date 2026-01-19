@@ -9,7 +9,6 @@ package stock
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
@@ -166,20 +165,19 @@ func (s *sStockQuarterlyProfit) GetQuarterlyProfit(ctx context.Context, in *stoc
 
 	// 发送 GET 请求并解析为 entity.QuarterlyProfit
 	var result []*entity.QuarterlyProfit
-	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	var resultMap []map[string]interface{}
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&resultMap)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取季度利润数据表数据失败，请稍后重试！")
 		return
 	}
 
-	for _, re := range result {
-		re.Symbol = in.Symbol
-		dateStr := re.Date.Format("Y-m-d")
-		re.Date = gtime.NewFromStr(dateStr)
+	for _, re := range resultMap {
+		re["symbol"] = in.Symbol
 	}
 	data = result
-	if len(result) > 0 {
-		_, err = s.Model(ctx).InsertIgnore(result)
+	if len(resultMap) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(resultMap)
 	}
 	return
 }

@@ -207,6 +207,10 @@ type (
 		// GetShareholderCount 获取公司股东户数统计表数据
 		GetShareholderCount(ctx context.Context, in *stockin.ShareholderCountGetShareholderCountInp) (data []*entity.ShareholderCount, err error)
 	}
+	IStockAiJudgment interface {
+		// Model ai 选股判断ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+	}
 	IStockBasicInfo interface {
 		// Model 股票基础信息表ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -240,6 +244,23 @@ type (
 		Status(ctx context.Context, in *stockin.StockListStatusInp) (err error)
 		// GetStockList 获取股票列表核心表数据
 		GetStockList(ctx context.Context, in *stockin.StockListGetStockListInp) (data []*entity.StockList, err error)
+	}
+	IStockSelfAi interface {
+		// Model ai 基本信息ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取ai 基本信息列表
+		List(ctx context.Context, in *stockin.StockSelfAiListInp) (list []*stockin.StockSelfAiListModel, totalCount int, err error)
+		// Export 导出ai 基本信息
+		Export(ctx context.Context, in *stockin.StockSelfAiListInp) (err error)
+		// Edit 修改/新增ai 基本信息
+		Edit(ctx context.Context, in *stockin.StockSelfAiEditInp) (err error)
+		// Delete 删除ai 基本信息
+		Delete(ctx context.Context, in *stockin.StockSelfAiDeleteInp) (err error)
+		// View 获取ai 基本信息指定信息
+		View(ctx context.Context, in *stockin.StockSelfAiViewInp) (res *stockin.StockSelfAiViewModel, err error)
+		InvokeAi(ctx context.Context, aiModel *entity.StockSelfAi, script string) (res *stockin.StockSelfAiViewModel, err error)
+		// InvokeQianWen 千问Api
+		InvokeQianWen(ctx context.Context, aiModel *entity.StockSelfAi, script string) (res string, err error)
 	}
 	IStockSelfCode interface {
 		// Model 自选股票ORM模型
@@ -282,8 +303,10 @@ var (
 	localStockQuarterlyProfit          IStockQuarterlyProfit
 	localStockShareholderChange        IStockShareholderChange
 	localStockShareholderCount         IStockShareholderCount
+	localStockAiJudgment               IStockAiJudgment
 	localStockBasicInfo                IStockBasicInfo
 	localStockList                     IStockList
+	localStockSelfAi                   IStockSelfAi
 	localStockSelfCode                 IStockSelfCode
 	localStockTopTenCirculatingHolders IStockTopTenCirculatingHolders
 )
@@ -420,6 +443,17 @@ func RegisterStockShareholderCount(i IStockShareholderCount) {
 	localStockShareholderCount = i
 }
 
+func StockAiJudgment() IStockAiJudgment {
+	if localStockAiJudgment == nil {
+		panic("implement not found for interface IStockAiJudgment, forgot register?")
+	}
+	return localStockAiJudgment
+}
+
+func RegisterStockAiJudgment(i IStockAiJudgment) {
+	localStockAiJudgment = i
+}
+
 func StockBasicInfo() IStockBasicInfo {
 	if localStockBasicInfo == nil {
 		panic("implement not found for interface IStockBasicInfo, forgot register?")
@@ -440,6 +474,17 @@ func StockList() IStockList {
 
 func RegisterStockList(i IStockList) {
 	localStockList = i
+}
+
+func StockSelfAi() IStockSelfAi {
+	if localStockSelfAi == nil {
+		panic("implement not found for interface IStockSelfAi, forgot register?")
+	}
+	return localStockSelfAi
+}
+
+func RegisterStockSelfAi(i IStockSelfAi) {
+	localStockSelfAi = i
 }
 
 func StockSelfCode() IStockSelfCode {

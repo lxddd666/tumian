@@ -9,7 +9,6 @@ package stock
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/os/gtime"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
@@ -172,24 +171,20 @@ func (s *sStockIncomeStatement) GetIncomeStatement(ctx context.Context, in *stoc
 
 	// 发送 GET 请求并解析为 entity.IncomeStatement
 	var result []*entity.IncomeStatement
-	var da interface{}
-	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&da)
+	var resultMap []map[string]interface{}
+
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&resultMap)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取利润表数据失败，请稍后重试！")
 		return
 	}
 
 	data = result
-	for _, re := range result {
-		re.Symbol = in.Symbol
-		re.Symbol = in.Symbol
-		dateStr := re.Jzrq.Format("Y-m-d")
-		re.Jzrq = gtime.NewFromStr(dateStr)
-		dateStr = re.Plrq.Format("Y-m-d")
-		re.Plrq = gtime.NewFromStr(dateStr)
+	for _, re := range resultMap {
+		re["symbol"] = in.Symbol
 	}
-	if len(result) > 0 {
-		_, err = s.Model(ctx).InsertIgnore(result)
+	if len(resultMap) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(resultMap)
 	}
 	return
 }

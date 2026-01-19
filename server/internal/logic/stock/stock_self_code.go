@@ -110,3 +110,7 @@ func (s *sStockSelfCode) GetAllSelfCode(ctx context.Context) (list []*entity.Sto
 	}
 	return
 }
+
+func GetSelfCodeDataForAi(ctx context.Context) {
+
+}

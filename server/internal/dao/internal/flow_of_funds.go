@@ -13,9 +13,10 @@ import (
 
 // FlowOfFundsDao is the data access object for the table hg_flow_of_funds.
 type FlowOfFundsDao struct {
-	table   string             // table is the underlying table name of the DAO.
-	group   string             // group is the database configuration group name of the current DAO.
-	columns FlowOfFundsColumns // columns contains all the column names of Table for convenient usage.
+	table    string             // table is the underlying table name of the DAO.
+	group    string             // group is the database configuration group name of the current DAO.
+	columns  FlowOfFundsColumns // columns contains all the column names of Table for convenient usage.
+	handlers []gdb.ModelHandler // handlers for customized model modification.
 }
 
 // FlowOfFundsColumns defines and stores column names for the table hg_flow_of_funds.
@@ -125,11 +126,12 @@ var flowOfFundsColumns = FlowOfFundsColumns{
 }
 
 // NewFlowOfFundsDao creates and returns a new DAO object for table data access.
-func NewFlowOfFundsDao() *FlowOfFundsDao {
+func NewFlowOfFundsDao(handlers ...gdb.ModelHandler) *FlowOfFundsDao {
 	return &FlowOfFundsDao{
-		group:   "default",
-		table:   "hg_flow_of_funds",
-		columns: flowOfFundsColumns,
+		group:    "default",
+		table:    "hg_flow_of_funds",
+		columns:  flowOfFundsColumns,
+		handlers: handlers,
 	}
 }
 
@@ -155,7 +157,11 @@ func (dao *FlowOfFundsDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *FlowOfFundsDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+	model := dao.DB().Model(dao.table)
+	for _, handler := range dao.handlers {
+		model = handler(model)
+	}
+	return model.Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

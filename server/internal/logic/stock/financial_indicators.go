@@ -158,7 +158,9 @@ func (s *sStockFinancialIndicators) GetFinancialIndicators(ctx context.Context, 
 
 	// 发送 GET 请求并解析为 entity.FinancialIndicators
 	var result []*entity.FinancialIndicators
-	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	var resultMap []map[string]interface{}
+
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&resultMap)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取财务指标分析表数据失败，请稍后重试！")
 		fmt.Println(err)
@@ -166,12 +168,12 @@ func (s *sStockFinancialIndicators) GetFinancialIndicators(ctx context.Context, 
 	}
 
 	data = result
-	for _, re := range result {
-		re.Symbol = in.Symbol
+	for _, re := range resultMap {
+		re["symbol"] = in.Symbol
 
 	}
-	if len(result) > 0 {
-		_, err = s.Model(ctx).InsertIgnore(result)
+	if len(resultMap) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(resultMap)
 	}
 	return
 }

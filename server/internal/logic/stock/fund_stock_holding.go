@@ -166,20 +166,22 @@ func (s *sStockFundStockHolding) GetFundStockHolding(ctx context.Context, in *st
 
 	// 发送 GET 请求并解析为 entity.FundStockHolding
 	var result []*entity.FundStockHolding
-	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
+	var resultMap []map[string]interface{}
+
+	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&resultMap)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取基金持股明细表数据失败，请稍后重试！")
 		return
 	}
-	for _, re := range result {
-		re.Symbol = in.Symbol
-		if re.T == nil {
-			re.T = re.Jzrq
+	for _, re := range resultMap {
+		re["symbol"] = in.Symbol
+		if re["t"] == nil {
+			re["t"] = re["jzrq"]
 		}
 	}
 	data = result
-	if len(result) > 0 {
-		_, err = s.Model(ctx).InsertIgnore(result)
+	if len(resultMap) > 0 {
+		_, err = s.Model(ctx).InsertIgnore(resultMap)
 	}
 	return
 }

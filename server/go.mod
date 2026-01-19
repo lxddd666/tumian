@@ -27,6 +27,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.94
 	github.com/mojocn/base64Captcha v1.3.8
 	github.com/olekukonko/tablewriter v1.1.0
+	github.com/openai/openai-go v1.12.0
 	github.com/qiniu/go-sdk/v7 v7.25.4
 	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/shirou/gopsutil/v3 v3.24.5
@@ -129,9 +130,10 @@ require (
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
-	github.com/tidwall/gjson v1.14.1 // indirect
+	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.0 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/tiendc/go-deepcopy v1.6.0 // indirect
 	github.com/tinylib/msgp v1.3.0 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
