@@ -174,19 +174,18 @@ func (s *sStockFlowOfFunds) GetFlowOfFunds(ctx context.Context, in *stockin.GetF
 	}
 
 	// 发送 GET 请求并解析为 entity.FlowOfFunds
-	var result []*entity.FlowOfFunds
+
+	var result []map[string]interface{}
+
 	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取资金流向明细表数据失败，请稍后重试！")
 		return
 	}
 	for _, re := range result {
-		re.Symbol = in.Symbol
+		re["symbol"] = in.Symbol
 	}
 	// 处理数据，只保留年月日部分
-
-	data = result
-
 	if len(result) > 0 {
 		_, err = s.Model(ctx).InsertIgnore(result)
 	}

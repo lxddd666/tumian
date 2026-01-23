@@ -35,7 +35,7 @@ func (s *sStockSelfCode) Model(ctx context.Context, option ...*handler.Option) *
 // SelfCodeIndicatorsApi 技术指标获取api获取（智兔api获取）
 func (s *sStockSelfCode) SelfCodeIndicatorsApi(ctx context.Context, in *stockin.SelfCodeIndicatorsApiInp) (err error) {
 	// 获取自己观察的股票
-	list, err := s.GetAllSelfCode(ctx)
+	list, err := s.GetAllSelfCode(ctx, in.Code)
 	if err != nil {
 		return
 	}
@@ -65,7 +65,7 @@ func (s *sStockSelfCode) SelfCodeIndicatorsApi(ctx context.Context, in *stockin.
 // SelfStockWorkingCapitalInfoApi 运营资金情况（智兔api获取）
 func (s *sStockSelfCode) SelfStockWorkingCapitalInfoApi(ctx context.Context, in *stockin.SelfCodeIndicatorsApiInp) (err error) {
 	// 获取自己观察的股票
-	list, err := s.GetAllSelfCode(ctx)
+	list, err := s.GetAllSelfCode(ctx, in.Code)
 	if err != nil {
 		return
 	}
@@ -99,8 +99,12 @@ func (s *sStockSelfCode) SelfStockWorkingCapitalInfoApi(ctx context.Context, in 
 }
 
 // GetAllSelfCode 获取所有code
-func (s *sStockSelfCode) GetAllSelfCode(ctx context.Context) (list []*entity.StockSelfCode, err error) {
-	err = s.Model(ctx).Scan(&list)
+func (s *sStockSelfCode) GetAllSelfCode(ctx context.Context, code string) (list []*entity.StockSelfCode, err error) {
+	mod := s.Model(ctx)
+	if code != "" {
+		mod.Where(dao.StockSelfCode.Columns().Dm, code)
+	}
+	err = mod.Scan(&list)
 	if err != nil {
 		return
 	}

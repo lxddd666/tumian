@@ -69,6 +69,10 @@ type StockAiJudgmentDeleteInp struct {
 	Id interface{} `json:"id" v:"required#自增主键不能为空" dc:"自增主键"`
 }
 
+type StockAiJudgmentAiJudgmentInp struct {
+	Symbol string `json:"symbol"                dc:"股票或标的代码 (例如: AAPL, 000001.SZ)"`
+}
+
 func (in *StockAiJudgmentDeleteInp) Filter(ctx context.Context) (err error) {
 	return
 }

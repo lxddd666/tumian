@@ -9,6 +9,11 @@ package stock
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/openai/openai-go"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
@@ -18,12 +23,6 @@ import (
 	"hotgo/internal/service"
 	"hotgo/utility/convert"
 	"hotgo/utility/excel"
-
-	"github.com/gogf/gf/v2/database/gdb"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/util/gconv"
 
 	"github.com/openai/openai-go/option"
 )
@@ -144,36 +143,157 @@ func (s *sStockSelfAi) View(ctx context.Context, in *stockin.StockSelfAiViewInp)
 	return
 }
 
-func (s *sStockSelfAi) InvokeAi(ctx context.Context, aiModel *entity.StockSelfAi, script string) (res *stockin.StockSelfAiViewModel, err error) {
+// GetAllAi 获取ai
+func (s *sStockSelfAi) GetAllAi(ctx context.Context, aiModel string) (list []*entity.StockSelfAi, err error) {
+	mod := s.Model(ctx)
+	if aiModel != "" {
+		mod = mod.Where(dao.StockSelfAi.Columns().AiModel, aiModel)
+	}
+	err = mod.Scan(&list)
+	return
+}
+
+// InvokeAi ai调用
+func (s *sStockSelfAi) InvokeAi(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error) {
 	if aiModel == nil {
 		return
 	}
 
-	switch aiModel.Model {
+	switch aiModel.AiModel {
 	case "qianwen": //千问
+		res, err = s.InvokeQianWen(ctx, aiModel, scripts)
+	case "bailin":
+		res, err = s.InvokeBailin(ctx, aiModel, scripts)
+	case "deepseek":
+		res, err = s.InvokeDeepseek(ctx, aiModel, scripts)
 
 	}
 	return
 }
 
 // InvokeQianWen 千问Api
-func (s *sStockSelfAi) InvokeQianWen(ctx context.Context, aiModel *entity.StockSelfAi, script string) (res string, err error) {
+func (s *sStockSelfAi) InvokeQianWen(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error) {
 	client := openai.NewClient(
-		option.WithAPIKey("sk-e3e1281b4d8e4990a0a839b6fb8f5ac1"),
-		option.WithBaseURL("https://dashscope.aliyuncs.com/compatible-mode/v1"),
+		option.WithAPIKey(aiModel.ApiKey),
+		option.WithBaseURL(aiModel.BaseUrl),
 	)
+
+	if len(scripts) == 0 {
+		return
+	}
+
+	var openaiChatCompletionNewParams openai.ChatCompletionNewParams
+	openaiChatCompletionNewParams.Model = aiModel.Model
+	for _, script := range scripts {
+		openaiChatCompletionNewParams.Messages = append(
+			openaiChatCompletionNewParams.Messages,
+			openai.UserMessage(script),
+		)
+	}
 	chatCompletion, err := client.Chat.Completions.New(
-		context.TODO(), openai.ChatCompletionNewParams{
-			Messages: []openai.ChatCompletionMessageParamUnion{
-				openai.UserMessage(script),
-			},
-			Model: "qwen-plus",
-		},
+		context.TODO(), openaiChatCompletionNewParams,
 	)
+
+	//chatCompletion, err := client.Chat.Completions.New(
+	//	context.TODO(), openai.ChatCompletionNewParams{
+	//		Messages: []openai.ChatCompletionMessageParamUnion{
+	//			openai.UserMessage("aaa"),
+	//			openai.UserMessage("bbb"),
+	//		},
+	//		Model: aiModel.Model,
+	//	},
+	//)
 
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Println(chatCompletion)
+	if len(chatCompletion.Choices) == 0 {
+		err = gerror.New("查无数据信息")
+		return
+	}
+
+	return chatCompletion.Choices[0].Message.Content, nil
+
+}
+
+// InvokeBailin 百灵APi
+func (s *sStockSelfAi) InvokeBailin(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error) {
+	client := openai.NewClient(
+		option.WithAPIKey(aiModel.ApiKey),
+		option.WithBaseURL(aiModel.BaseUrl),
+	)
+	//chatCompletion, err := client.Chat.Completions.New(
+	//	context.TODO(), openai.ChatCompletionNewParams{
+	//		Messages: []openai.ChatCompletionMessageParamUnion{
+	//			openai.UserMessage(script),
+	//		},
+	//		Model: aiModel.Model,
+	//	},
+	//)
+
+	if len(scripts) == 0 {
+		return
+	}
+
+	var openaiChatCompletionNewParams openai.ChatCompletionNewParams
+	openaiChatCompletionNewParams.Model = aiModel.Model
+	for _, script := range scripts {
+		openaiChatCompletionNewParams.Messages = append(
+			openaiChatCompletionNewParams.Messages,
+			openai.UserMessage(script),
+		)
+	}
+	chatCompletion, err := client.Chat.Completions.New(
+		context.TODO(), openaiChatCompletionNewParams,
+	)
+
+	if err != nil {
+		return
+	}
+	if len(chatCompletion.Choices) == 0 {
+		err = gerror.New("查无数据信息")
+		return
+	}
+
+	return chatCompletion.Choices[0].Message.Content, nil
+
+}
+
+// InvokeDeepseek deepseek
+func (s *sStockSelfAi) InvokeDeepseek(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error) {
+	client := openai.NewClient(
+		option.WithAPIKey(aiModel.ApiKey),
+		option.WithBaseURL(aiModel.BaseUrl),
+	)
+
+	var openaiChatCompletionNewParams openai.ChatCompletionNewParams
+	openaiChatCompletionNewParams.Model = aiModel.Model
+	for _, script := range scripts {
+		openaiChatCompletionNewParams.Messages = append(
+			openaiChatCompletionNewParams.Messages,
+			openai.UserMessage(script),
+		)
+	}
+	chatCompletion, err := client.Chat.Completions.New(
+		context.TODO(), openaiChatCompletionNewParams,
+	)
+	//chatCompletion, err := client.Chat.Completions.New(
+	//	context.TODO(), openai.ChatCompletionNewParams{
+	//		Messages: []openai.ChatCompletionMessageParamUnion{
+	//			openai.UserMessage(script),
+	//		},
+	//		Model: aiModel.Model,
+	//	},
+	//)
+
+	if err != nil {
+		return
+	}
+
+	println(chatCompletion.Model)
+
+	if len(chatCompletion.Choices) > 0 {
+		res = chatCompletion.Choices[0].Message.Content
+	}
 	return
 }

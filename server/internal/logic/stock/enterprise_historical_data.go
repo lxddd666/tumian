@@ -9,7 +9,6 @@ package stock
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/os/gtime"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
 	"hotgo/internal/library/hgorm/handler"
@@ -179,7 +178,7 @@ func (s *sStockEnterpriseHistoricalData) GetEnterpriseHistoricalData(ctx context
 	//}
 
 	// 发送 GET 请求并解析为 entity.EnterpriseHistoricalData
-	var result []*entity.EnterpriseHistoricalData
+	var result []map[string]interface{}
 	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取企业级历史行情数据表数据失败，请稍后重试！")
@@ -187,11 +186,8 @@ func (s *sStockEnterpriseHistoricalData) GetEnterpriseHistoricalData(ctx context
 	}
 
 	for _, re := range result {
-		re.Symbol = in.Symbol
-		dateStr := re.T.Format("Y-m-d")
-		re.T = gtime.NewFromStr(dateStr)
+		re["symbol"] = in.Symbol
 	}
-	data = result
 	if len(result) > 0 {
 		_, err = s.Model(ctx).InsertIgnore(result)
 	}

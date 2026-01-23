@@ -210,6 +210,8 @@ type (
 	IStockAiJudgment interface {
 		// Model ai 选股判断ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// InvokeJudgment ai荐股
+		InvokeJudgment(ctx context.Context, in *stockin.StockAiJudgmentAiJudgmentInp)
 	}
 	IStockBasicInfo interface {
 		// Model 股票基础信息表ORM模型
@@ -258,9 +260,17 @@ type (
 		Delete(ctx context.Context, in *stockin.StockSelfAiDeleteInp) (err error)
 		// View 获取ai 基本信息指定信息
 		View(ctx context.Context, in *stockin.StockSelfAiViewInp) (res *stockin.StockSelfAiViewModel, err error)
-		InvokeAi(ctx context.Context, aiModel *entity.StockSelfAi, script string) (res *stockin.StockSelfAiViewModel, err error)
+		// GetAllAi 获取ai
+		GetAllAi(ctx context.Context, aiModel string) (list []*entity.StockSelfAi, err error)
+		// InvokeAi ai调用
+
+		InvokeAi(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error)
 		// InvokeQianWen 千问Api
-		InvokeQianWen(ctx context.Context, aiModel *entity.StockSelfAi, script string) (res string, err error)
+		InvokeQianWen(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error)
+		// InvokeBailin 百灵APi
+		InvokeBailin(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error)
+		// InvokeDeepseek deepseek
+		InvokeDeepseek(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error)
 	}
 	IStockSelfCode interface {
 		// Model 自选股票ORM模型
@@ -270,7 +280,7 @@ type (
 		// SelfStockWorkingCapitalInfoApi 运营资金情况（智兔api获取）
 		SelfStockWorkingCapitalInfoApi(ctx context.Context, in *stockin.SelfCodeIndicatorsApiInp) (err error)
 		// GetAllSelfCode 获取所有code
-		GetAllSelfCode(ctx context.Context) (list []*entity.StockSelfCode, err error)
+		GetAllSelfCode(ctx context.Context, code string) (list []*entity.StockSelfCode, err error)
 	}
 	IStockTopTenCirculatingHolders interface {
 		// Model 公司十大流通股东表 (数据来源于定期报告)[citation:4]ORM模型

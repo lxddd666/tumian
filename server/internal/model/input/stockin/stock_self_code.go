@@ -47,6 +47,7 @@ type StockSelfCodeDeleteInp struct {
 
 // SelfCodeIndicatorsApiInp 技术指标获取--APi
 type SelfCodeIndicatorsApiInp struct {
+	Code string `json:"code"`
 }
 
 func (in *StockSelfCodeDeleteInp) Filter(ctx context.Context) (err error) {

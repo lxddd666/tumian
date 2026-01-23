@@ -13,20 +13,21 @@ import (
 
 // StockSelfAiDao is the data access object for the table hg_stock_self_ai.
 type StockSelfAiDao struct {
-	table    string             // table is the underlying table name of the DAO.
-	group    string             // group is the database configuration group name of the current DAO.
-	columns  StockSelfAiColumns // columns contains all the column names of Table for convenient usage.
-	handlers []gdb.ModelHandler // handlers for customized model modification.
+	table   string             // table is the underlying table name of the DAO.
+	group   string             // group is the database configuration group name of the current DAO.
+	columns StockSelfAiColumns // columns contains all the column names of Table for convenient usage.
 }
 
 // StockSelfAiColumns defines and stores column names for the table hg_stock_self_ai.
 type StockSelfAiColumns struct {
 	Id        string // 自增主键
-	Name      string // ai名称 例如deepseek 千问
+	Name      string // ai模型全称名称 例如deepseek-plus 千问
 	Model     string // ai model
 	BaseUrl   string // ai base url
 	ApiKey    string // ai api key
 	CreatedAt string // 创建时间
+	AiModel   string // 语言模型 qianwen deepseek
+	Status    string // 0正常 -1不正常
 }
 
 // stockSelfAiColumns holds the columns for the table hg_stock_self_ai.
@@ -37,15 +38,16 @@ var stockSelfAiColumns = StockSelfAiColumns{
 	BaseUrl:   "base_url",
 	ApiKey:    "api_key",
 	CreatedAt: "created_at",
+	AiModel:   "ai_model",
+	Status:    "status",
 }
 
 // NewStockSelfAiDao creates and returns a new DAO object for table data access.
-func NewStockSelfAiDao(handlers ...gdb.ModelHandler) *StockSelfAiDao {
+func NewStockSelfAiDao() *StockSelfAiDao {
 	return &StockSelfAiDao{
-		group:    "default",
-		table:    "hg_stock_self_ai",
-		columns:  stockSelfAiColumns,
-		handlers: handlers,
+		group:   "default",
+		table:   "hg_stock_self_ai",
+		columns: stockSelfAiColumns,
 	}
 }
 
@@ -71,11 +73,7 @@ func (dao *StockSelfAiDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *StockSelfAiDao) Ctx(ctx context.Context) *gdb.Model {
-	model := dao.DB().Model(dao.table)
-	for _, handler := range dao.handlers {
-		model = handler(model)
-	}
-	return model.Safe().Ctx(ctx)
+	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

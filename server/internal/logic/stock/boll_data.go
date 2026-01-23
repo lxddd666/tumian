@@ -181,19 +181,18 @@ func (s *sStockBollData) GetBoll(ctx context.Context, in *stockin.BollDataGetBol
 	}
 
 	// 发送 GET 请求并解析为 entity.BollData
-	var result []*entity.BollData
+	var result []map[string]interface{}
+
 	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取布林带(BOLL)指标数据失败，请稍后重试！")
 		return
 	}
 	for _, re := range result {
-		re.Symbol = in.Symbol
-		dateStr := re.T.Format("Y-m-d")
-		re.T = gtime.NewFromStr(dateStr)
-		re.IntervalType = in.Interval
+		re["symbol"] = in.Symbol
+		re["IntervalType"] = in.Interval
+
 	}
-	data = result
 	if len(result) > 0 {
 		_, err = s.Model(ctx).InsertIgnore(result)
 	}

@@ -57,3 +57,10 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+type AiJudgmentReq struct {
+	g.Meta `path:"/stockAiJudgment/aiJudgment" method:"post" tags:"ai 选股判断" summary:"ai鉴股"`
+	stockin.StockAiJudgmentAiJudgmentInp
+}
+
+type AiJudgmentRes struct{}

@@ -9,7 +9,6 @@ package stock
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/os/gtime"
 	"hotgo/internal/consts"
 	"hotgo/internal/dao"
 	"hotgo/internal/global"
@@ -181,7 +180,8 @@ func (s *sStockMaData) GetMa(ctx context.Context, in *stockin.MaDataGetMaInp) (d
 	}
 
 	// 发送 GET 请求并解析为 entity.MaData
-	var result []*entity.MaData
+	var result []map[string]interface{}
+
 	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&result)
 	if err != nil {
 		err = gerror.Wrap(err, "调用外部API获取移动平均线(MA)指标数据失败，请稍后重试！")
@@ -189,12 +189,9 @@ func (s *sStockMaData) GetMa(ctx context.Context, in *stockin.MaDataGetMaInp) (d
 	}
 
 	for _, re := range result {
-		re.Symbol = in.Symbol
-		dateStr := re.T.Format("Y-m-d")
-		re.T = gtime.NewFromStr(dateStr)
-		re.IntervalType = in.Interval
+		re["symbol"] = in.Symbol
+		re["interval"] = in.Interval
 	}
-	data = result
 	if len(result) > 0 {
 		_, err = s.Model(ctx).InsertIgnore(result)
 	}
