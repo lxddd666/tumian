@@ -64,3 +64,10 @@ type AiJudgmentReq struct {
 }
 
 type AiJudgmentRes struct{}
+
+type AiJudgmentFinancialDataReq struct {
+	g.Meta `path:"/stockAiJudgment/aiJudgmentFinancialDataReq" method:"post" tags:"ai 选股判断" summary:"ai财务数据鉴定股票鉴股"`
+	stockin.StockAiJudgmentAiJudgmentInp
+}
+
+type AiJudgmentFinancialDataRes struct{}

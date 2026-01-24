@@ -211,7 +211,7 @@ type (
 		// Model ai 选股判断ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
 		// InvokeJudgment ai荐股
-		InvokeJudgment(ctx context.Context, in *stockin.StockAiJudgmentAiJudgmentInp)
+		InvokeIndicatorsJudgment(ctx context.Context, in *stockin.StockAiJudgmentAiJudgmentInp)
 	}
 	IStockBasicInfo interface {
 		// Model 股票基础信息表ORM模型
