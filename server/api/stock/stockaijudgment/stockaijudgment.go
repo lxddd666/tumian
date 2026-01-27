@@ -71,3 +71,10 @@ type AiJudgmentFinancialDataReq struct {
 }
 
 type AiJudgmentFinancialDataRes struct{}
+
+type AiJudgmentComprehensiveDataReq struct {
+	g.Meta `path:"/stockAiJudgment/AiJudgmentComprehensiveDataReq" method:"post" tags:"ai 选股判断" summary:"ai综合指标数据鉴定股票鉴股"`
+	stockin.StockAiJudgmentAiJudgmentInp
+}
+
+type AiJudgmentComprehensiveDataRes struct{}

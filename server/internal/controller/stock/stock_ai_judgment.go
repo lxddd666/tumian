@@ -29,3 +29,9 @@ func (c *cStockAiJudgment) AiJudgmentFinancialData(ctx context.Context, req *sto
 	service.StockAiJudgment().AiJudgmentFinancialData(ctx, &req.StockAiJudgmentAiJudgmentInp)
 	return
 }
+
+// AiJudgmentComprehensiveData ai综合指标数据鉴定股票鉴股
+func (c *cStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, req *stockaijudgment.AiJudgmentComprehensiveDataReq) (res *stockaijudgment.AiJudgmentComprehensiveDataRes, err error) {
+	service.StockAiJudgment().AiJudgmentComprehensiveData(ctx, &req.StockAiJudgmentAiJudgmentInp)
+	return
+}

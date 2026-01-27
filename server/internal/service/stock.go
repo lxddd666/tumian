@@ -210,8 +210,12 @@ type (
 	IStockAiJudgment interface {
 		// Model ai 选股判断ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
-		// InvokeJudgment ai荐股
+		// AiJudgmentComprehensiveData 综合
+		AiJudgmentComprehensiveData(ctx context.Context, in *stockin.StockAiJudgmentAiJudgmentInp)
+		// InvokeIndicatorsJudgment 指标判断股票
 		InvokeIndicatorsJudgment(ctx context.Context, in *stockin.StockAiJudgmentAiJudgmentInp)
+		// AiJudgmentFinancialData 财报数据ai鉴定
+		AiJudgmentFinancialData(ctx context.Context, in *stockin.StockAiJudgmentAiJudgmentInp)
 	}
 	IStockBasicInfo interface {
 		// Model 股票基础信息表ORM模型
@@ -263,7 +267,6 @@ type (
 		// GetAllAi 获取ai
 		GetAllAi(ctx context.Context, aiModel string) (list []*entity.StockSelfAi, err error)
 		// InvokeAi ai调用
-
 		InvokeAi(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error)
 		// InvokeQianWen 千问Api
 		InvokeQianWen(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error)

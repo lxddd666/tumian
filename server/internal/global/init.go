@@ -27,8 +27,10 @@ import (
 	"hotgo/utility/charset"
 	"hotgo/utility/simple"
 	"hotgo/utility/validate"
+	"math/rand"
 	"runtime"
 	"strings"
+	"time"
 )
 
 func Init(ctx context.Context) {
@@ -62,10 +64,19 @@ func Init(ctx context.Context) {
 	SubscribeClusterSync(ctx)
 
 	InitStockToken(ctx)
+
 }
 
 func InitStockToken(ctx context.Context) {
 	_ = g.Cfg().MustGet(ctx, "zhitu.token").Scan(&StockToken)
+}
+
+func GetToken() string {
+	if len(StockToken) > 0 {
+		rand.Seed(time.Now().UnixNano())
+		return StockToken[rand.Intn(len(StockToken))]
+	}
+	return ""
 }
 
 // LoggingServeLogHandler 服务日志处理

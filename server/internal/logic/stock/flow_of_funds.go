@@ -145,7 +145,7 @@ func (s *sStockFlowOfFunds) View(ctx context.Context, in *stockin.FlowOfFundsVie
 
 // GetFlowOfFunds 获取资金流向明细表数据
 func (s *sStockFlowOfFunds) GetFlowOfFunds(ctx context.Context, in *stockin.GetFlowOfFundsInp) (data []*entity.FlowOfFunds, err error) {
-	flag, err := s.Model(ctx).Where(dao.FlowOfFunds.Columns().T, GetNowDate()).Exist()
+	flag, err := s.Model(ctx).Where(dao.FlowOfFunds.Columns().Symbol, in.Symbol).Where(dao.FlowOfFunds.Columns().T, GetNowDate()).Exist()
 	if err != nil {
 		return
 	}
@@ -159,14 +159,14 @@ func (s *sStockFlowOfFunds) GetFlowOfFunds(ctx context.Context, in *stockin.GetF
 
 	// 构建查询参数
 	params := g.Map{
-		"token": global.StockToken,
+		"token": global.GetToken(),
 	}
 
 	// 添加可选参数
-	if in.StartTime != "" {
+	if in.StartTime == "" {
 		params["st"] = GetYewBefore(1)
 	}
-	if in.EndTime != "" {
+	if in.EndTime == "" {
 		params["et"] = GetNowDate()
 	}
 	if in.Limit <= 0 {

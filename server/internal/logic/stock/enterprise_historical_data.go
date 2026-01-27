@@ -163,7 +163,7 @@ func (s *sStockEnterpriseHistoricalData) GetEnterpriseHistoricalData(ctx context
 
 	// 构建查询参数
 	params := g.Map{
-		"token": global.StockToken,
+		"token": global.GetToken(),
 	}
 
 	// 添加可选参数

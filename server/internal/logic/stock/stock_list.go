@@ -191,7 +191,7 @@ func (s *sStockList) GetStockList(ctx context.Context, in *stockin.StockListGetS
 
 	// 构建查询参数
 	params := g.Map{
-		"token": global.StockToken,
+		"token": global.GetToken(),
 	}
 
 	// 添加可选参数

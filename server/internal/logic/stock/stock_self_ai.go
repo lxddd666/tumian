@@ -162,7 +162,7 @@ func (s *sStockSelfAi) InvokeAi(ctx context.Context, aiModel *entity.StockSelfAi
 	switch aiModel.AiModel {
 	case "qianwen": //千问
 		res, err = s.InvokeQianWen(ctx, aiModel, scripts)
-	case "bailin":
+	case "bailing":
 		res, err = s.InvokeBailin(ctx, aiModel, scripts)
 	case "deepseek":
 		res, err = s.InvokeDeepseek(ctx, aiModel, scripts)

@@ -160,7 +160,7 @@ func (s *sStockQuarterlyProfit) GetQuarterlyProfit(ctx context.Context, in *stoc
 
 	// 构建查询参数
 	params := g.Map{
-		"token": global.StockToken,
+		"token": global.GetToken(),
 	}
 
 	// 发送 GET 请求并解析为 entity.QuarterlyProfit

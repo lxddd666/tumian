@@ -153,12 +153,12 @@ func (s *sStockFinancialIndicators) GetFinancialIndicators(ctx context.Context, 
 
 	// 构建查询参数
 	params := g.Map{
-		"token": global.StockToken,
+		"token": global.GetToken(),
 	}
 
 	// 发送 GET 请求并解析为 entity.FinancialIndicators
 	var result []*entity.FinancialIndicators
-	var resultMap []map[string]interface{}
+	resultMap := make([]map[string]interface{}, 0)
 
 	err = g.Client().GetVar(ctx, apiUrl, params).Scan(&resultMap)
 	if err != nil {
