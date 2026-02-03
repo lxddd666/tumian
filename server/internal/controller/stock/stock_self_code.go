@@ -29,3 +29,9 @@ func (c *cStockSelfCode) SelfStockWorkingCapitalInfoApi(ctx context.Context, req
 	err = service.StockSelfCode().SelfStockWorkingCapitalInfoApi(ctx, &req.SelfCodeIndicatorsApiInp)
 	return
 }
+
+func (c *cStockSelfCode) BaiduFinanceCode(ctx context.Context, req *stockselfcode.BaiduFinanceCodeReq) (res *stockselfcode.BaiduFinanceCodeRes, err error) {
+	err = service.StockSelfCode().BaiduFinanceCode(ctx, &req.SelfCodeIndicatorsApiInp)
+
+	return
+}

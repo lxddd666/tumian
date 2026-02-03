@@ -13,10 +13,9 @@ import (
 
 // StockAllCodeDao is the data access object for the table hg_stock_all_code.
 type StockAllCodeDao struct {
-	table    string              // table is the underlying table name of the DAO.
-	group    string              // group is the database configuration group name of the current DAO.
-	columns  StockAllCodeColumns // columns contains all the column names of Table for convenient usage.
-	handlers []gdb.ModelHandler  // handlers for customized model modification.
+	table   string              // table is the underlying table name of the DAO.
+	group   string              // group is the database configuration group name of the current DAO.
+	columns StockAllCodeColumns // columns contains all the column names of Table for convenient usage.
 }
 
 // StockAllCodeColumns defines and stores column names for the table hg_stock_all_code.
@@ -25,6 +24,7 @@ type StockAllCodeColumns struct {
 	Mc        string // 股票名称
 	Jys       string // 交易所
 	CreatedAt string // 创建时间
+	Industry  string // 所属行业
 }
 
 // stockAllCodeColumns holds the columns for the table hg_stock_all_code.
@@ -33,15 +33,15 @@ var stockAllCodeColumns = StockAllCodeColumns{
 	Mc:        "mc",
 	Jys:       "jys",
 	CreatedAt: "created_at",
+	Industry:  "industry",
 }
 
 // NewStockAllCodeDao creates and returns a new DAO object for table data access.
-func NewStockAllCodeDao(handlers ...gdb.ModelHandler) *StockAllCodeDao {
+func NewStockAllCodeDao() *StockAllCodeDao {
 	return &StockAllCodeDao{
-		group:    "default",
-		table:    "hg_stock_all_code",
-		columns:  stockAllCodeColumns,
-		handlers: handlers,
+		group:   "default",
+		table:   "hg_stock_all_code",
+		columns: stockAllCodeColumns,
 	}
 }
 
@@ -67,11 +67,7 @@ func (dao *StockAllCodeDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *StockAllCodeDao) Ctx(ctx context.Context) *gdb.Model {
-	model := dao.DB().Model(dao.table)
-	for _, handler := range dao.handlers {
-		model = handler(model)
-	}
-	return model.Safe().Ctx(ctx)
+	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

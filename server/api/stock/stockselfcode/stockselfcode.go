@@ -25,3 +25,10 @@ type SelfStockWorkingCapitalInfoApiReq struct {
 }
 
 type SelfStockWorkingCapitalInfoApiRes struct{}
+
+type BaiduFinanceCodeReq struct {
+	g.Meta `path:"/stockSelfCode/baiduFinanceCode" method:"Get" tags:"自选股票" summary:"百度财经分析（百度财经）"`
+	stockin.SelfCodeIndicatorsApiInp
+}
+
+type BaiduFinanceCodeRes struct{}

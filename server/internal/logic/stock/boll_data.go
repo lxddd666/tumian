@@ -214,6 +214,11 @@ func GetYewBefore(year int) string {
 // 如果当天是工作日，返回当天；否则返回上一个工作日
 func GetRecentWeekday() string {
 	now := time.Now()
+	// 判断是否需要回溯一天（早于9:30）
+
+	if now.Hour() < 9 || (now.Hour() == 9 && now.Minute() < 30) {
+		now = now.AddDate(0, 0, -1)
+	}
 	weekday := now.Weekday()
 
 	// 计算需要回溯的天数
@@ -239,4 +244,40 @@ func GetRecentWeekday() string {
 		0, 0, 0, 0, targetDate.Location())
 
 	return gtime.NewFromTime(dateOnly).Format("Ymd")
+}
+
+// GetRecentWeekdayClear 返回最近的工作日（周一到周五），时间部分清零
+// 如果当天是工作日，返回当天；否则返回上一个工作日
+func GetRecentWeekdayClear() string {
+	now := time.Now()
+	// 判断是否需要回溯一天（早于9:30）
+
+	if now.Hour() < 9 || (now.Hour() == 9 && now.Minute() < 30) {
+		now = now.AddDate(0, 0, -1)
+	}
+	weekday := now.Weekday()
+
+	// 计算需要回溯的天数
+	daysToSubtract := 0
+
+	switch weekday {
+	case time.Saturday:
+		// 周六：回溯1天到周五
+		daysToSubtract = 1
+	case time.Sunday:
+		// 周日：回溯2天到周五
+		daysToSubtract = 2
+	default:
+		// 周一到周五：不需要回溯
+		daysToSubtract = 0
+	}
+
+	// 计算目标日期
+	targetDate := now.AddDate(0, 0, -daysToSubtract)
+
+	// 清零时间部分，只保留年月日
+	dateOnly := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(),
+		0, 0, 0, 0, targetDate.Location())
+
+	return gtime.NewFromTime(dateOnly).Format("Y-m-d")
 }

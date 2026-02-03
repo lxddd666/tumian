@@ -23,6 +23,7 @@ import (
 	"hotgo/internal/service"
 	"hotgo/utility/convert"
 	"hotgo/utility/excel"
+	"regexp"
 
 	"github.com/openai/openai-go/option"
 )
@@ -166,7 +167,15 @@ func (s *sStockSelfAi) InvokeAi(ctx context.Context, aiModel *entity.StockSelfAi
 		res, err = s.InvokeBailin(ctx, aiModel, scripts)
 	case "deepseek":
 		res, err = s.InvokeDeepseek(ctx, aiModel, scripts)
+	case "minimax":
+		res, err = s.InvokeMiniMax(ctx, aiModel, scripts)
+	}
 
+	re := regexp.MustCompile(`\{[^}]*\}`)
+	match := re.FindString(res)
+	if match != "" {
+		res = match
+	} else {
 	}
 	return
 }
@@ -261,6 +270,45 @@ func (s *sStockSelfAi) InvokeBailin(ctx context.Context, aiModel *entity.StockSe
 
 // InvokeDeepseek deepseek
 func (s *sStockSelfAi) InvokeDeepseek(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error) {
+	client := openai.NewClient(
+		option.WithAPIKey(aiModel.ApiKey),
+		option.WithBaseURL(aiModel.BaseUrl),
+	)
+
+	var openaiChatCompletionNewParams openai.ChatCompletionNewParams
+	openaiChatCompletionNewParams.Model = aiModel.Model
+	for _, script := range scripts {
+		openaiChatCompletionNewParams.Messages = append(
+			openaiChatCompletionNewParams.Messages,
+			openai.UserMessage(script),
+		)
+	}
+	chatCompletion, err := client.Chat.Completions.New(
+		context.TODO(), openaiChatCompletionNewParams,
+	)
+	//chatCompletion, err := client.Chat.Completions.New(
+	//	context.TODO(), openai.ChatCompletionNewParams{
+	//		Messages: []openai.ChatCompletionMessageParamUnion{
+	//			openai.UserMessage(script),
+	//		},
+	//		Model: aiModel.Model,
+	//	},
+	//)
+
+	if err != nil {
+		return
+	}
+
+	println(chatCompletion.Model)
+
+	if len(chatCompletion.Choices) > 0 {
+		res = chatCompletion.Choices[0].Message.Content
+	}
+	return
+}
+
+// InvokeMiniMax minimax
+func (s *sStockSelfAi) InvokeMiniMax(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error) {
 	client := openai.NewClient(
 		option.WithAPIKey(aiModel.ApiKey),
 		option.WithBaseURL(aiModel.BaseUrl),

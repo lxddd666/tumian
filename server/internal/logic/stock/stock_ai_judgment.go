@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
 	"hotgo/internal/dao"
@@ -19,8 +18,6 @@ import (
 	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
-	"hotgo/utility/simple"
-	"sync"
 	"time"
 )
 
@@ -58,32 +55,32 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 		err = gerror.New("获取可用ai为空")
 		return
 	}
-	wg := sync.WaitGroup{}
+	//wg := sync.WaitGroup{}
 	for _, stock := range list {
 		stockCode := stock
-		wg.Add(1)
-		simple.SafeGo(gctx.New(), func(ctx context.Context) {
-			wg.Done()
+		//wg.Add(1)
+		//simple.SafeGo(gctx.New(), func(ctx context.Context) {
+		//	wg.Done()
 
-			var kLine *entity.EnterpriseHistoricalData
-			_ = service.StockEnterpriseHistoricalData().Model(ctx).Where(dao.EnterpriseHistoricalData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.EnterpriseHistoricalData.Columns().T).Scan(&kLine)
+		var kLine *entity.EnterpriseHistoricalData
+		_ = service.StockEnterpriseHistoricalData().Model(ctx).Where(dao.EnterpriseHistoricalData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.EnterpriseHistoricalData.Columns().T).Scan(&kLine)
 
-			var macd *entity.MacdData
-			_ = service.StockMacdData().Model(ctx).Where(dao.MacdData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.MacdData.Columns().T).Scan(&macd)
+		var macd *entity.MacdData
+		_ = service.StockMacdData().Model(ctx).Where(dao.MacdData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.MacdData.Columns().T).Scan(&macd)
 
-			var ma *entity.MaData
-			_ = service.StockMaData().Model(ctx).Where(dao.MaData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.MaData.Columns().T).Scan(&ma)
+		var ma *entity.MaData
+		_ = service.StockMaData().Model(ctx).Where(dao.MaData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.MaData.Columns().T).Scan(&ma)
 
-			var boll *entity.BollData
-			_ = service.StockBollData().Model(ctx).Where(dao.BollData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.BollData.Columns().T).Scan(&boll)
+		var boll *entity.BollData
+		_ = service.StockBollData().Model(ctx).Where(dao.BollData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.BollData.Columns().T).Scan(&boll)
 
-			var kdj *entity.KdjData
-			_ = service.StockKdjData().Model(ctx).Where(dao.KdjData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.KdjData.Columns().T).Scan(&kdj)
+		var kdj *entity.KdjData
+		_ = service.StockKdjData().Model(ctx).Where(dao.KdjData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.KdjData.Columns().T).Scan(&kdj)
 
-			var flowOfFunds *entity.FlowOfFunds
-			_ = service.StockFlowOfFunds().Model(ctx).Where(dao.FlowOfFunds.Columns().Symbol, stockCode.Dm).OrderDesc(dao.KdjData.Columns().T).Scan(&flowOfFunds)
-			// 查询所有指标
-			indicatorStr := fmt.Sprintf(`
+		var flowOfFunds *entity.FlowOfFunds
+		_ = service.StockFlowOfFunds().Model(ctx).Where(dao.FlowOfFunds.Columns().Symbol, stockCode.Dm).OrderDesc(dao.KdjData.Columns().T).Scan(&flowOfFunds)
+		// 查询所有指标
+		indicatorStr := fmt.Sprintf(`
 			股票代码[%s]股票名称[%s]
 			[1D趋势]
 			K线收盘价:%f,前收盘价:%f,今日成交量:%f,今日成交额:%f;
@@ -92,54 +89,39 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 			BOLL中 上轨:%f,下轨:%f,中轨:%f;
 			KDJ中: K值:%f,D值:%f,J值:%f,;
 			资金流向明细:大单动向:%f,大单差分:%f,主买特大单成交额:%f,主卖特大单成交额:%f,主买大单成交额:%f,主卖大单成交额:%f,被动买特大单成交额:%f,被动卖特大单成交额:%f,主买特大单成交额增量:%f,主买大单成交额增量:%f,涨跌动因:%f,主买单总单数:%d,主卖单总单数:%d,主买特大单成交量:%d,成交笔数增量:%d,
-			
-			请按此JSON格式输出决策(无Markdown):
-			{{
-			 "indicatorsJudgment": "指标判断,给出一个短中长期投资建议以及理由<100字"
-			 "indicatorsFlag": "仅根据当日数据指标判断是否买入 true/false",
-			 "financialJudgment: "仅根据公司股票、财务、财报指标数据判断是否应该买入/卖出，给出一个短中长期投资建议以及理由<100字",
-			 "financialFlag": "仅根据公司股票、财务、财报指标数据判断是否应该买入 true/false",
-			 "comprehensiveJudgment": "综合指标，根据当前数据指标和当前公司的公司股票、财务、财报指标数据来给出一个综合的短中长投资建议理由<100字"
-			 "comprehensiveFlag": "根据综合指标判断是否买入 true/false"
-			 "target": "根据综合指标，买入必须确定一个预计止盈价",
-			 "stop": "根据综合指标，买入必须确定一个预计止损价"
-			}}
-			要求:
-			1.仅输出JSON
-			2.输出一个中短期的策略
-			3.开仓必填止盈损
-			`, stockCode.Dm, stockCode.Mc,
-				kLine.C, kLine.Pc, kLine.V, kLine.A,
-				macd.Diff, macd.Dea, macd.Macd, macd.Ema12, macd.Ema26,
-				ma.Ma3, ma.Ma5, ma.Ma10, ma.Ma15, ma.Ma20, ma.Ma30, ma.Ma60,
-				boll.U, boll.D, boll.M,
-				kdj.K, kdj.D, kdj.J,
-				flowOfFunds.Dddx, flowOfFunds.Ddcf, flowOfFunds.Zmbtdcje, flowOfFunds.Zmstdcje, flowOfFunds.Zmbddcje, flowOfFunds.Zmsddcje, flowOfFunds.Bdmbtdcje, flowOfFunds.Bdmstdcje, flowOfFunds.Zmbtdcjzl, flowOfFunds.Zmbddcjzl, flowOfFunds.Zddy, flowOfFunds.Zmbzds, flowOfFunds.Zmszds, flowOfFunds.Zmbtdcjl, flowOfFunds.Cjbszl,
-			)
 
-			// 财务指标
-			var financialIndicator *entity.FinancialIndicators
-			_ = service.StockFinancialIndicators().Model(ctx).Where(dao.FinancialIndicators.Columns().Symbol, stock.Dm).OrderDesc(dao.FinancialIndicators.Columns().Date).Scan(&financialIndicator)
-			if financialIndicator == nil {
-				return
-			}
-			var inCome *entity.IncomeStatement
-			_ = service.StockIncomeStatement().Model(ctx).Where(dao.IncomeStatement.Columns().Symbol, stock.Dm).OrderDesc(dao.IncomeStatement.Columns().Plrq).Scan(&inCome)
-			if inCome == nil {
-				return
-			}
-			var quarterlyProfit *entity.QuarterlyProfit
-			_ = service.StockQuarterlyProfit().Model(ctx).Where(dao.QuarterlyProfit.Columns().Symbol, stock.Dm).OrderDesc(dao.QuarterlyProfit.Columns().Date).Scan(&quarterlyProfit)
-			if quarterlyProfit == nil {
-				return
-			}
-			var shareholderChange *entity.ShareholderChange
-			_ = service.StockShareholderChange().Model(ctx).Where(dao.ShareholderChange.Columns().Symbol, stock.Dm).OrderDesc(dao.ShareholderChange.Columns().Jzrq).Scan(&shareholderChange)
-			if shareholderChange == nil {
-				return
-			}
-			// 查询所有指标
-			financialStr := fmt.Sprintf(`
+			`, stockCode.Dm, stockCode.Mc,
+			kLine.C, kLine.Pc, kLine.V, kLine.A,
+			macd.Diff, macd.Dea, macd.Macd, macd.Ema12, macd.Ema26,
+			ma.Ma3, ma.Ma5, ma.Ma10, ma.Ma15, ma.Ma20, ma.Ma30, ma.Ma60,
+			boll.U, boll.D, boll.M,
+			kdj.K, kdj.D, kdj.J,
+			flowOfFunds.Dddx, flowOfFunds.Ddcf, flowOfFunds.Zmbtdcje, flowOfFunds.Zmstdcje, flowOfFunds.Zmbddcje, flowOfFunds.Zmsddcje, flowOfFunds.Bdmbtdcje, flowOfFunds.Bdmstdcje, flowOfFunds.Zmbtdcjzl, flowOfFunds.Zmbddcjzl, flowOfFunds.Zddy, flowOfFunds.Zmbzds, flowOfFunds.Zmszds, flowOfFunds.Zmbtdcjl, flowOfFunds.Cjbszl,
+		)
+
+		// 财务指标
+		var financialIndicator *entity.FinancialIndicators
+		_ = service.StockFinancialIndicators().Model(ctx).Where(dao.FinancialIndicators.Columns().Symbol, stockCode.Dm).OrderDesc(dao.FinancialIndicators.Columns().Date).Scan(&financialIndicator)
+		if financialIndicator == nil {
+			return
+		}
+		var inCome *entity.IncomeStatement
+		_ = service.StockIncomeStatement().Model(ctx).Where(dao.IncomeStatement.Columns().Symbol, stockCode.Dm).OrderDesc(dao.IncomeStatement.Columns().Plrq).Scan(&inCome)
+		if inCome == nil {
+			return
+		}
+		var quarterlyProfit *entity.QuarterlyProfit
+		_ = service.StockQuarterlyProfit().Model(ctx).Where(dao.QuarterlyProfit.Columns().Symbol, stockCode.Dm).OrderDesc(dao.QuarterlyProfit.Columns().Date).Scan(&quarterlyProfit)
+		if quarterlyProfit == nil {
+			return
+		}
+		var shareholderChange *entity.ShareholderChange
+		_ = service.StockShareholderChange().Model(ctx).Where(dao.ShareholderChange.Columns().Symbol, stockCode.Dm).OrderDesc(dao.ShareholderChange.Columns().Jzrq).Scan(&shareholderChange)
+		if shareholderChange == nil {
+			return
+		}
+		// 查询所有指标
+		financialStr := fmt.Sprintf(`
 			股票代码[%s]股票名称[%s]
 			[公司股票、财务、财报指标数据 时间:%s]
 			摊薄每股收益(元):%f,加权每股收益(元):%f,净利润增长率:%f,流动比率:%f,速动比率:%f,应收账款周转率(次):%f,应收账款周转天数(天):%f,存货周转率(次):%f;
@@ -154,23 +136,23 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 
 			[公司股东变化数 截至时间: %s 公告时间:%s]
 			股东户数:%d,比上期变化百分比:%f;
-			`, stock.Dm, stock.Mc, financialIndicator.Date,
-				financialIndicator.Tbmg, financialIndicator.Jqmg, financialIndicator.Jlzz, financialIndicator.Ldbl, financialIndicator.Sdbl, financialIndicator.Yszz, financialIndicator.Yszzt, financialIndicator.Chzzl,
-				financialIndicator.Zysr, financialIndicator.Zzzzl, financialIndicator.Zylr, financialIndicator.Jylrb, financialIndicator.Kflr, financialIndicator.Kfmg,
-				financialIndicator.Zcfzl, financialIndicator.Yylr, financialIndicator.Xsjl, financialIndicator.Kflr, financialIndicator.Jqjz,
+			`, stockCode.Dm, stockCode.Mc, financialIndicator.Date,
+			financialIndicator.Tbmg, financialIndicator.Jqmg, financialIndicator.Jlzz, financialIndicator.Ldbl, financialIndicator.Sdbl, financialIndicator.Yszz, financialIndicator.Yszzt, financialIndicator.Chzzl,
+			financialIndicator.Zysr, financialIndicator.Zzzzl, financialIndicator.Zylr, financialIndicator.Jylrb, financialIndicator.Kflr, financialIndicator.Kfmg,
+			financialIndicator.Zcfzl, financialIndicator.Yylr, financialIndicator.Xsjl, financialIndicator.Kflr, financialIndicator.Jqjz,
 
-				inCome.Jzrq, inCome.Plrq,
-				inCome.Yysr, inCome.Yyzsr, inCome.Jlr, inCome.Gsmgsyzzdjlr, inCome.Jlrhfcjcx, inCome.Yylr, inCome.GrossMargin, inCome.OperatingMargin, inCome.Tzsy, inCome.Gyjzbdsy, inCome.Zcjzss,
+			inCome.Jzrq, inCome.Plrq,
+			inCome.Yysr, inCome.Yyzsr, inCome.Jlr, inCome.Gsmgsyzzdjlr, inCome.Jlrhfcjcx, inCome.Yylr, inCome.GrossMargin, inCome.OperatingMargin, inCome.Tzsy, inCome.Gyjzbdsy, inCome.Zcjzss,
 
-				quarterlyProfit.Date, quarterlyProfit.ReportQuarter,
-				quarterlyProfit.Basege,
+			quarterlyProfit.Date, quarterlyProfit.ReportQuarter,
+			quarterlyProfit.Basege,
 
-				shareholderChange.Jzrq, shareholderChange.AnnDate,
-				shareholderChange.Gdhs, shareholderChange.Bh,
-			)
+			shareholderChange.Jzrq, shareholderChange.AnnDate,
+			shareholderChange.Gdhs, shareholderChange.Bh,
+		)
 
-			// 输出格式
-			outputFormat := fmt.Sprintf(`
+		// 输出格式
+		outputFormat := fmt.Sprintf(`
 			请按此JSON,仅仅输出{}内容,格式输出决策(无Markdown):
 			{{
 			 "indicatorsJudgment": "指标判断,给出一个短中长期投资建议以及理由<100字"
@@ -178,7 +160,7 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 			 "financialJudgment: "仅根据公司股票、财务、财报指标数据判断是否应该买入/卖出，给出一个短中长期投资建议以及理由<100字",
 			 "financialFlag": "仅根据公司股票、财务、财报指标数据判断是否应该买入 true/false",
 			 "comprehensiveJudgment": "综合指标，根据当前数据指标和当前公司的公司股票、财务、财报指标数据来给出一个综合的短中长投资建议理由<100字"
-			 "comprehensiveFlag": "根据综合指标判断是否买入 true/false"
+			 "comprehensiveFlag": "根据综合指标判断是否买入 1买入 2不买(填1/2)"
 			 "target": "根据综合指标，买入必须确定一个预计止盈价",
 			 "stop": "根据综合指标，买入必须确定一个预计止损价"
 			}}
@@ -188,48 +170,75 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 			3.开仓必填止盈损
 		`)
 
-			scripts := make([]string, 0)
-			scripts = append(scripts, SystemMessage)
-			scripts = append(scripts, indicatorStr) // 财报指标
-			scripts = append(scripts, financialStr) // 财务指标
-			scripts = append(scripts, outputFormat) // 输出格式
+		scripts := make([]string, 0)
+		scripts = append(scripts, SystemMessage)
+		scripts = append(scripts, indicatorStr) // 财报指标
+		scripts = append(scripts, financialStr) // 财务指标
+		scripts = append(scripts, outputFormat) // 输出格式
 
-			aiModelList, _ := service.StockSelfAi().GetAllAi(ctx, "")
-			for _, model := range aiModelList {
-				now := time.Now()
-				nt := now.Format("2006-01-02")
-				flag, _ := service.StockAiJudgment().Model(ctx).Where(dao.StockAiJudgment.Columns().Symbol, stock.Dm).Where(dao.StockAiJudgment.Columns().T, nt).Where(dao.StockAiJudgment.Columns().AiId, model.Id).Exist()
-				if flag {
-					continue
-				}
-				res, gerr := service.StockSelfAi().InvokeAi(ctx, model, scripts)
-				if gerr != nil {
-					return
-				}
-
-				res = gstr.Replace(res, "`", "")
-				res = gstr.Replace(res, "json", "")
-
-				var resMap map[string]interface{}
-				err = gconv.Scan(res, &resMap)
-				if err != nil {
-					return
-				} // 当前时间
-				if resMap == nil {
-					continue
-				}
-				resMap["t"] = now.Format("2006-01-02") // 固定格
-				resMap["aiId"] = model.Id
-				resMap["aiName"] = model.Name
-				resMap["judgmentIndicatorsScript"] = indicatorStr
-				resMap["judgmentFinancialScript"] = financialStr
-				resMap["symbol"] = stockCode.Dm
-				resMap["mc"] = stockCode.Mc
-				service.StockAiJudgment().Model(ctx).Insert(resMap)
+		aiModelList, _ := service.StockSelfAi().GetAllAi(ctx, "")
+		for _, model := range aiModelList {
+			now := GetRecentWeekdayClear()
+			//nt := now.Format("2006-01-02")
+			flag, _ := service.StockAiJudgment().Model(ctx).Where(dao.StockAiJudgment.Columns().Symbol, stockCode.Dm).Where(dao.StockAiJudgment.Columns().T, now).Where(dao.StockAiJudgment.Columns().AiId, model.Id).Exist()
+			if flag {
+				continue
 			}
-		})
+			res, gerr := service.StockSelfAi().InvokeAi(ctx, model, scripts)
+			if gerr != nil {
+				continue
+			}
+
+			res = gstr.Replace(res, "`", "")
+			res = gstr.Replace(res, "json", "")
+
+			var resMap map[string]interface{}
+			err = gconv.Scan(res, &resMap)
+			if err != nil {
+				return
+			} // 当前时间
+			if resMap == nil {
+				continue
+			}
+			resMap["t"] = now // 固定格
+			resMap["aiId"] = model.Id
+			resMap["aiName"] = model.Name
+			resMap["judgmentIndicatorsScript"] = indicatorStr
+			resMap["judgmentFinancialScript"] = financialStr
+			resMap["symbol"] = stockCode.Dm
+			resMap["mc"] = stockCode.Mc
+			if resMap["comprehensiveFlag"] != nil && resMap["comprehensiveFlag"] == true {
+				resMap["comprehensiveFlag"] = 1
+			}
+			if resMap["comprehensiveFlag"] != nil && resMap["comprehensiveFlag"] == false {
+				resMap["comprehensiveFlag"] = 0
+			}
+			if resMap["indicatorsFlag"] != nil && resMap["indicatorsFlag"] == true {
+				resMap["indicatorsFlag"] = 1
+			}
+			if resMap["indicatorsFlag"] != nil && resMap["indicatorsFlag"] == false {
+				resMap["indicatorsFlag"] = 0
+			}
+			if resMap["financialFlag"] != nil && resMap["financialFlag"] == true {
+				resMap["financialFlag"] = 1
+			}
+			if resMap["financialFlag"] != nil && resMap["financialFlag"] == false {
+				resMap["financialFlag"] = 0
+			}
+			if resMap["target"] != nil && resMap["target"] == "" {
+				resMap["target"] = 0
+			}
+			if resMap["stop"] != nil && resMap["stop"] == "" {
+				resMap["stop"] = 0
+			}
+			_, err = service.StockAiJudgment().Model(ctx).Insert(resMap)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+		//})
 	}
-	wg.Wait()
+	//wg.Wait()
 	return
 }
 

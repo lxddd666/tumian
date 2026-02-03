@@ -145,7 +145,7 @@ func (s *sStockFlowOfFunds) View(ctx context.Context, in *stockin.FlowOfFundsVie
 
 // GetFlowOfFunds 获取资金流向明细表数据
 func (s *sStockFlowOfFunds) GetFlowOfFunds(ctx context.Context, in *stockin.GetFlowOfFundsInp) (data []*entity.FlowOfFunds, err error) {
-	flag, err := s.Model(ctx).Where(dao.FlowOfFunds.Columns().Symbol, in.Symbol).Where(dao.FlowOfFunds.Columns().T, GetNowDate()).Exist()
+	flag, err := s.Model(ctx).Where(dao.FlowOfFunds.Columns().Symbol, in.Symbol).Where(dao.FlowOfFunds.Columns().T, GetRecentWeekday()).Exist()
 	if err != nil {
 		return
 	}

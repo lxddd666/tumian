@@ -15,6 +15,18 @@ import (
 )
 
 type (
+	IStockSelfCode interface {
+		// BaiduFinanceCode 百度财经爬虫
+		BaiduFinanceCode(ctx context.Context, in *stockin.SelfCodeIndicatorsApiInp) (err error)
+		// Model 自选股票ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// SelfCodeIndicatorsApi 技术指标获取api获取（智兔api获取）
+		SelfCodeIndicatorsApi(ctx context.Context, in *stockin.SelfCodeIndicatorsApiInp) (err error)
+		// SelfStockWorkingCapitalInfoApi 运营资金情况（智兔api获取）
+		SelfStockWorkingCapitalInfoApi(ctx context.Context, in *stockin.SelfCodeIndicatorsApiInp) (err error)
+		// GetAllSelfCode 获取所有code
+		GetAllSelfCode(ctx context.Context, code string) (list []*entity.StockSelfCode, err error)
+	}
 	IStockBollData interface {
 		// Model 布林带(BOLL)指标数据表ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -251,6 +263,20 @@ type (
 		// GetStockList 获取股票列表核心表数据
 		GetStockList(ctx context.Context, in *stockin.StockListGetStockListInp) (data []*entity.StockList, err error)
 	}
+	IStockScoreMain interface {
+		// Model 股票评分主表ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取股票评分主表列表
+		List(ctx context.Context, in *stockin.StockScoreMainListInp) (list []*stockin.StockScoreMainListModel, totalCount int, err error)
+		// Export 导出股票评分主表
+		Export(ctx context.Context, in *stockin.StockScoreMainListInp) (err error)
+		// Edit 修改/新增股票评分主表
+		Edit(ctx context.Context, in *stockin.StockScoreMainEditInp) (err error)
+		// Delete 删除股票评分主表
+		Delete(ctx context.Context, in *stockin.StockScoreMainDeleteInp) (err error)
+		// View 获取股票评分主表指定信息
+		View(ctx context.Context, in *stockin.StockScoreMainViewInp) (res *stockin.StockScoreMainViewModel, err error)
+	}
 	IStockSelfAi interface {
 		// Model ai 基本信息ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -274,16 +300,22 @@ type (
 		InvokeBailin(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error)
 		// InvokeDeepseek deepseek
 		InvokeDeepseek(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error)
+		// InvokeMiniMax minimax
+		InvokeMiniMax(ctx context.Context, aiModel *entity.StockSelfAi, scripts []string) (res string, err error)
 	}
-	IStockSelfCode interface {
-		// Model 自选股票ORM模型
+	IStockSupportResistance interface {
+		// Model 股票支撑阻力表ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
-		// SelfCodeIndicatorsApi 技术指标获取api获取（智兔api获取）
-		SelfCodeIndicatorsApi(ctx context.Context, in *stockin.SelfCodeIndicatorsApiInp) (err error)
-		// SelfStockWorkingCapitalInfoApi 运营资金情况（智兔api获取）
-		SelfStockWorkingCapitalInfoApi(ctx context.Context, in *stockin.SelfCodeIndicatorsApiInp) (err error)
-		// GetAllSelfCode 获取所有code
-		GetAllSelfCode(ctx context.Context, code string) (list []*entity.StockSelfCode, err error)
+		// List 获取股票支撑阻力表列表
+		List(ctx context.Context, in *stockin.StockSupportResistanceListInp) (list []*stockin.StockSupportResistanceListModel, totalCount int, err error)
+		// Export 导出股票支撑阻力表
+		Export(ctx context.Context, in *stockin.StockSupportResistanceListInp) (err error)
+		// Edit 修改/新增股票支撑阻力表
+		Edit(ctx context.Context, in *stockin.StockSupportResistanceEditInp) (err error)
+		// Delete 删除股票支撑阻力表
+		Delete(ctx context.Context, in *stockin.StockSupportResistanceDeleteInp) (err error)
+		// View 获取股票支撑阻力表指定信息
+		View(ctx context.Context, in *stockin.StockSupportResistanceViewInp) (res *stockin.StockSupportResistanceViewModel, err error)
 	}
 	IStockTopTenCirculatingHolders interface {
 		// Model 公司十大流通股东表 (数据来源于定期报告)[citation:4]ORM模型
@@ -304,6 +336,7 @@ type (
 )
 
 var (
+	localStockSelfCode                 IStockSelfCode
 	localStockBollData                 IStockBollData
 	localStockEnterpriseHistoricalData IStockEnterpriseHistoricalData
 	localStockFinancialIndicators      IStockFinancialIndicators
@@ -319,10 +352,22 @@ var (
 	localStockAiJudgment               IStockAiJudgment
 	localStockBasicInfo                IStockBasicInfo
 	localStockList                     IStockList
+	localStockScoreMain                IStockScoreMain
 	localStockSelfAi                   IStockSelfAi
-	localStockSelfCode                 IStockSelfCode
+	localStockSupportResistance        IStockSupportResistance
 	localStockTopTenCirculatingHolders IStockTopTenCirculatingHolders
 )
+
+func StockSelfCode() IStockSelfCode {
+	if localStockSelfCode == nil {
+		panic("implement not found for interface IStockSelfCode, forgot register?")
+	}
+	return localStockSelfCode
+}
+
+func RegisterStockSelfCode(i IStockSelfCode) {
+	localStockSelfCode = i
+}
 
 func StockBollData() IStockBollData {
 	if localStockBollData == nil {
@@ -489,6 +534,17 @@ func RegisterStockList(i IStockList) {
 	localStockList = i
 }
 
+func StockScoreMain() IStockScoreMain {
+	if localStockScoreMain == nil {
+		panic("implement not found for interface IStockScoreMain, forgot register?")
+	}
+	return localStockScoreMain
+}
+
+func RegisterStockScoreMain(i IStockScoreMain) {
+	localStockScoreMain = i
+}
+
 func StockSelfAi() IStockSelfAi {
 	if localStockSelfAi == nil {
 		panic("implement not found for interface IStockSelfAi, forgot register?")
@@ -500,15 +556,15 @@ func RegisterStockSelfAi(i IStockSelfAi) {
 	localStockSelfAi = i
 }
 
-func StockSelfCode() IStockSelfCode {
-	if localStockSelfCode == nil {
-		panic("implement not found for interface IStockSelfCode, forgot register?")
+func StockSupportResistance() IStockSupportResistance {
+	if localStockSupportResistance == nil {
+		panic("implement not found for interface IStockSupportResistance, forgot register?")
 	}
-	return localStockSelfCode
+	return localStockSupportResistance
 }
 
-func RegisterStockSelfCode(i IStockSelfCode) {
-	localStockSelfCode = i
+func RegisterStockSupportResistance(i IStockSupportResistance) {
+	localStockSupportResistance = i
 }
 
 func StockTopTenCirculatingHolders() IStockTopTenCirculatingHolders {
