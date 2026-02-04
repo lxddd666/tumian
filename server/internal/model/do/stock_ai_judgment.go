@@ -25,6 +25,9 @@ type StockAiJudgment struct {
 	Stop                     any         // 开仓止损价格
 	JudgmentIndicatorsScript any         // 指标判断话术
 	JudgmentFinancialScript  any         // 财务判断话术
+	FinancialMttScript       any         // 财报mtt评分
+	SupportScript            any         // 支撑位压力位
+	ValuationMttScript       any         // 估值
 	CreatedAt                *gtime.Time // 创建时间
 	AiId                     any         // ai id
 	AiName                   any         // ai名称

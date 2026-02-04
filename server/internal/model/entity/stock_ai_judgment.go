@@ -23,6 +23,9 @@ type StockAiJudgment struct {
 	Stop                     float64     `json:"stop"                     orm:"stop"                       description:"开仓止损价格"`
 	JudgmentIndicatorsScript string      `json:"judgmentIndicatorsScript" orm:"judgment_indicators_script" description:"指标判断话术"`
 	JudgmentFinancialScript  string      `json:"judgmentFinancialScript"  orm:"judgment_financial_script"  description:"财务判断话术"`
+	FinancialMttScript       string      `json:"financialMttScript"       orm:"financial_mtt_script"       description:"财报mtt评分"`
+	SupportScript            string      `json:"supportScript"            orm:"support_script"             description:"支撑位压力位"`
+	ValuationMttScript       string      `json:"valuationMttScript"       orm:"valuation_mtt_script"       description:"估值"`
 	CreatedAt                *gtime.Time `json:"createdAt"                orm:"created_at"                 description:"创建时间"`
 	AiId                     int64       `json:"aiId"                     orm:"ai_id"                      description:"ai id"`
 	AiName                   string      `json:"aiName"                   orm:"ai_name"                    description:"ai名称"`

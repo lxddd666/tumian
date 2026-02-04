@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"github.com/chromedp/chromedp"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/os/grpool"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -30,35 +28,70 @@ func (s *sStockSelfCode) BaiduFinanceCode(ctx context.Context, in *stockin.SelfC
 	if len(list) == 0 {
 		return
 	}
+
+	// 创建容量为3的协程池
+	pool := make(chan struct{}, 20)
+
+	// 创建WaitGroup等待所有任务完成
+	var wg sync.WaitGroup
+
+	// 错误收集
+	var mu sync.Mutex
+	var errs []error
+
 	for _, stockCode := range list {
-		gp := grpool.New(20)
 		stock := stockCode
-		_ = gp.AddWithRecover(ctx, func(ctx context.Context) {
-			wg := sync.WaitGroup{}
-			wg.Add(1)
-			simple.SafeGo(gctx.New(), func(ctx context.Context) {
-				defer wg.Done()
-				// 获取支撑位
-				err = supportResistance(ctx, stock)
-			})
 
-			wg.Add(1)
-			simple.SafeGo(gctx.New(), func(ctx context.Context) {
-				// 指标打分
-				defer wg.Done()
-				err = scoreMain(ctx, stock)
-			})
+		wg.Add(1)
 
-			// 估值
-			wg.Add(1)
-			simple.SafeGo(gctx.New(), func(ctx context.Context) {
-				defer wg.Done()
-				err = valuationIndicators(ctx, stock, "3Y")
-			})
-			return
-		}, nil)
+		// 启动协程
+		simple.SafeGo(ctx, func(ctx context.Context) {
+			defer wg.Done()
 
+			// 获取池中的令牌
+			pool <- struct{}{}
+			defer func() {
+				// 释放令牌
+				<-pool
+			}()
+
+			// 这里我们可以选择：
+			// 1. 顺序执行三个任务（简单但可能不是最有效率）
+			// 2. 或者创建子协程（但这样会超出池容量限制）
+
+			// 方案1：顺序执行三个任务
+			subErr := supportResistance(ctx, stock)
+			if subErr != nil {
+				mu.Lock()
+				errs = append(errs, fmt.Errorf("supportResistance error for %s: %v", stock.Dm, subErr))
+				mu.Unlock()
+			}
+
+			subErr = scoreMain(ctx, stock)
+			if subErr != nil {
+				mu.Lock()
+				errs = append(errs, fmt.Errorf("scoreMain error for %s: %v", stock.Dm, subErr))
+				mu.Unlock()
+			}
+
+			subErr = valuationIndicators(ctx, stock, "3Y")
+			if subErr != nil {
+				mu.Lock()
+				errs = append(errs, fmt.Errorf("valuationIndicators error for %s: %v", stock.Dm, subErr))
+				mu.Unlock()
+			}
+		})
 	}
+
+	// 等待所有任务完成
+	wg.Wait()
+
+	// 如果有错误，返回第一个错误或合并错误
+	if len(errs) > 0 {
+		// 可以选择返回第一个错误，或者合并所有错误
+		err = fmt.Errorf("处理过程中发生 %d 个错误，第一个错误: %v", len(errs), errs[0])
+	}
+
 	return
 }
 
@@ -80,6 +113,9 @@ func scoreMain(ctx context.Context, stock *entity.StockAllCode) (err error) {
 		newScore.T = gtime.New(time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()))
 		if result != nil {
 			re := result["Result"].(map[string]interface{})
+			if re["synthesisScore"] == nil {
+				return
+			}
 			synthesisScore := re["synthesisScore"].(map[string]interface{})
 			if stock.Industry == "" {
 				stock.Industry = gconv.String(synthesisScore["secondIndustryName"])
@@ -191,6 +227,11 @@ func valuationIndicators(ctx context.Context, stock *entity.StockAllCode, CalcWi
 				}
 			}
 		}
+	}
+	if mtt.T == nil {
+		now := time.Now()
+		mtt.T = gtime.New(time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()))
+
 	}
 	_, err = dao.ValuationIndicators.Ctx(ctx).Save(mtt)
 	return

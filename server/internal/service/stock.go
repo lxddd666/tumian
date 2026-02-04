@@ -187,6 +187,22 @@ type (
 		// GetQuarterlyProfit 获取季度利润数据表数据
 		GetQuarterlyProfit(ctx context.Context, in *stockin.QuarterlyProfitGetQuarterlyProfitInp) (data []*entity.QuarterlyProfit, err error)
 	}
+	IStockRsiData interface {
+		// Model rsi指标数据表ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取rsi指标数据表列表
+		List(ctx context.Context, in *stockin.RsiDataListInp) (list []*stockin.RsiDataListModel, totalCount int, err error)
+		// Export 导出rsi指标数据表
+		Export(ctx context.Context, in *stockin.RsiDataListInp) (err error)
+		// Edit 修改/新增rsi指标数据表
+		Edit(ctx context.Context, in *stockin.RsiDataEditInp) (err error)
+		// Delete 删除rsi指标数据表
+		Delete(ctx context.Context, in *stockin.RsiDataDeleteInp) (err error)
+		// View 获取rsi指标数据表指定信息
+		View(ctx context.Context, in *stockin.RsiDataViewInp) (res *stockin.RsiDataViewModel, err error)
+		// GetRsiData 获取rsi指标数据表指定信息
+		GetRsiData(ctx context.Context, in *stockin.GetRsiDataInp) (res *stockin.RsiDataViewModel, err error)
+	}
 	IStockShareholderChange interface {
 		// Model 股东户数变化记录表 (记录相邻报告期的户数变化)ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -347,6 +363,7 @@ var (
 	localStockMaData                   IStockMaData
 	localStockMacdData                 IStockMacdData
 	localStockQuarterlyProfit          IStockQuarterlyProfit
+	localStockRsiData                  IStockRsiData
 	localStockShareholderChange        IStockShareholderChange
 	localStockShareholderCount         IStockShareholderCount
 	localStockAiJudgment               IStockAiJudgment
@@ -477,6 +494,17 @@ func StockQuarterlyProfit() IStockQuarterlyProfit {
 
 func RegisterStockQuarterlyProfit(i IStockQuarterlyProfit) {
 	localStockQuarterlyProfit = i
+}
+
+func StockRsiData() IStockRsiData {
+	if localStockRsiData == nil {
+		panic("implement not found for interface IStockRsiData, forgot register?")
+	}
+	return localStockRsiData
+}
+
+func RegisterStockRsiData(i IStockRsiData) {
+	localStockRsiData = i
 }
 
 func StockShareholderChange() IStockShareholderChange {

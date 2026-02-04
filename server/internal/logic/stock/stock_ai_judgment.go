@@ -36,7 +36,7 @@ func (s *sStockAiJudgment) Model(ctx context.Context, option ...*handler.Option)
 	return handler.Model(dao.StockAiJudgment.Ctx(ctx), option...)
 }
 
-const SystemMessage = `你资深量化分析师。根据1d的K线及MACD/MA/BOLL/KDJ指标以及财报和公司分析行情，输出JSON交易决策。`
+const SystemMessage = `你资深量化分析师。根据1d的K线及MACD/MA/BOLL/KDJ指标以及财报、公司估值、财报指标、历史股票支撑压力位、分析行情等，输出JSON交易决策。`
 
 // AiJudgmentComprehensiveData 综合
 func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *stockin.StockAiJudgmentAiJudgmentInp) {
@@ -61,6 +61,7 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 		//wg.Add(1)
 		//simple.SafeGo(gctx.New(), func(ctx context.Context) {
 		//	wg.Done()
+		scripts := make([]string, 0)
 
 		var kLine *entity.EnterpriseHistoricalData
 		_ = service.StockEnterpriseHistoricalData().Model(ctx).Where(dao.EnterpriseHistoricalData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.EnterpriseHistoricalData.Columns().T).Scan(&kLine)
@@ -151,6 +152,114 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 			shareholderChange.Gdhs, shareholderChange.Bh,
 		)
 
+		// 财报评分
+		var financialMttScript string
+
+		var financialIndicatorsMtt *entity.FinancialIndicatorsMtt
+		_ = dao.FinancialIndicatorsMtt.Ctx(ctx).Where(dao.FinancialIndicatorsMtt.Columns().Symbol, stock.Dm).Scan(&financialIndicatorsMtt)
+		if financialIndicatorsMtt != nil {
+			var profitMttScript string       // 盈利能力
+			var solvencyScript string        // 偿债能力
+			var profitQualityScript string   // 盈利质量
+			var dividendReturnsScript string // 股息回报
+			if financialIndicatorsMtt.RevenueGrowthTtm != 0 || financialIndicatorsMtt.GrossProfitMarginTtm != 0 || financialIndicatorsMtt.RoaTtm != 0 || financialIndicatorsMtt.NetProfitMarginTtm != 0 {
+				profitMttScript = "[公司盈利能力] \n"
+				if financialIndicatorsMtt.RevenueGrowthTtm != 0 {
+					profitMttScript += fmt.Sprintf("营收增长率TTM(%%):%f,营收增长率TTM同比增长(%%):%f;", financialIndicatorsMtt.RevenueGrowthTtm, financialIndicatorsMtt.RevenueGrowthTtmYoy)
+				}
+				if financialIndicatorsMtt.GrossProfitMarginTtm != 0 {
+					profitMttScript += fmt.Sprintf("销售毛利率TTM(%%):%f,销售毛利率TTM同比增长(%%):%f;", financialIndicatorsMtt.GrossProfitMarginTtm, financialIndicatorsMtt.GrossProfitMarginTtmYoy)
+				}
+				if financialIndicatorsMtt.RoaTtm != 0 {
+					profitMttScript += fmt.Sprintf("净资产收益率TTM(%%):%f,净资产收益率TTM同比增长(%%):%f;", financialIndicatorsMtt.RoaTtm, financialIndicatorsMtt.RoaTtmYoy)
+				}
+				if financialIndicatorsMtt.NetProfitMarginTtm != 0 {
+					profitMttScript += fmt.Sprintf("销售净利率TTM(%%):%f,销售净利率TTM同比增长(%%):%f;", financialIndicatorsMtt.NetProfitMarginTtm, financialIndicatorsMtt.NetProfitMarginTtmYoy)
+				}
+			}
+			if financialIndicatorsMtt.CurrentRatio != 0 || financialIndicatorsMtt.DebtToAssetRatio != 0 || financialIndicatorsMtt.QuickRatio != 0 {
+				solvencyScript = "[公司偿债能力]\n"
+				if financialIndicatorsMtt.CurrentRatio != 0 {
+					solvencyScript += fmt.Sprintf("流动比率(%%):%f,流动比率同比增长(%%):%f;", financialIndicatorsMtt.CurrentRatio, financialIndicatorsMtt.CurrentRatioYoy)
+				}
+				if financialIndicatorsMtt.DebtToAssetRatio != 0 {
+					solvencyScript += fmt.Sprintf("资产负债率(%%):%f,资产负债率同比增长(%%):%f;", financialIndicatorsMtt.DebtToAssetRatio, financialIndicatorsMtt.DebtToAssetRatioYoy)
+				}
+				if financialIndicatorsMtt.QuickRatio != 0 {
+					solvencyScript += fmt.Sprintf("速动比率(%%):%f,速动比率同比增长(%%):%f;", financialIndicatorsMtt.QuickRatio, financialIndicatorsMtt.QuickRatioYoy)
+				}
+				if financialIndicatorsMtt.InterestCoverage != 0 {
+					solvencyScript += fmt.Sprintf("利息保障倍数:%f,利息保障倍数同比增长(%%):%f;", financialIndicatorsMtt.InterestCoverage, financialIndicatorsMtt.InterestCoverageYoy)
+				}
+			}
+			if financialIndicatorsMtt.NetProfitCashContent != 0 || financialIndicatorsMtt.InventoryTurnoverDays != 0 || financialIndicatorsMtt.ReceivableTurnoverDays != 0 {
+				profitQualityScript = "[公司盈利质量]\n"
+				if financialIndicatorsMtt.NetProfitCashContent != 0 {
+					profitQualityScript += fmt.Sprintf("净利润现金含量(%%):%f,净利润现金含量同比增长(%%):%f;", financialIndicatorsMtt.NetProfitCashContent, financialIndicatorsMtt.NetProfitCashContentYoy)
+				}
+				if financialIndicatorsMtt.InventoryTurnoverDays != 0 {
+					profitQualityScript += fmt.Sprintf("存货周转天数(天/次):%f,存货周转天数同比增长(%%):%f;", financialIndicatorsMtt.InventoryTurnoverDays, financialIndicatorsMtt.InventoryTurnoverDaysYoy)
+				}
+				if financialIndicatorsMtt.ReceivableTurnoverDays != 0 {
+					profitQualityScript += fmt.Sprintf("应收周转天数(天/次):%f,应收周转天数同比增长(%%):%f;", financialIndicatorsMtt.ReceivableTurnoverDays, financialIndicatorsMtt.ReceivableTurnoverDaysYoy)
+				}
+			}
+			if financialIndicatorsMtt.DividendGrowthTtm != 0 || financialIndicatorsMtt.DividendPayoutRatioTtm != 0 || financialIndicatorsMtt.DividendYieldTtm != 0 {
+				dividendReturnsScript = "[公司股息回报]\n"
+				if financialIndicatorsMtt.DividendGrowthTtm != 0 {
+					dividendReturnsScript += fmt.Sprintf("股息增长率TTM(%%):%f,股息增长率TTM同比增长(%%):%f;", financialIndicatorsMtt.DividendGrowthTtm, financialIndicatorsMtt.DividendGrowthTtmYoy)
+				}
+				if financialIndicatorsMtt.DividendPayoutRatioTtm != 0 {
+					dividendReturnsScript += fmt.Sprintf("股息支付率TTM(%%):%f,股息支付率TTM同比增长(%%):%f;", financialIndicatorsMtt.DividendPayoutRatioTtm, financialIndicatorsMtt.DividendPayoutRatioTtmYoy)
+				}
+				if financialIndicatorsMtt.DividendYieldTtm != 0 {
+					dividendReturnsScript += fmt.Sprintf("股息率TTM(%%):%f,股息率TTM同比增长(%%):%f;", financialIndicatorsMtt.DividendYieldTtm, financialIndicatorsMtt.DividendYieldTtmYoy)
+				}
+			}
+			financialMttScript = profitMttScript + "\n" + solvencyScript + "\n" + profitQualityScript + "\n" + dividendReturnsScript
+			if financialMttScript != "" {
+				scripts = append(scripts, financialMttScript)
+			}
+		}
+
+		// 支撑位 压力位
+		var support *entity.StockSupportResistance
+		_ = dao.StockSupportResistance.Ctx(ctx).Where(dao.StockSupportResistance.Columns().Symbol, stock.Dm).Scan(&support)
+
+		var suppScript string
+		if support != nil {
+
+			if support.Zc != 0 || support.Yl != 0 {
+				if support.Price != 0 {
+					suppScript = fmt.Sprintf("股票如今价格:%f，", support.Price)
+
+					if support.Zc != 0 {
+						suppScript += fmt.Sprintf("股票价格支撑位:%f，", support.Zc)
+					}
+					if support.Yl != 0 {
+						suppScript += fmt.Sprintf("股票价格压力位:%f，", support.Zc)
+					}
+				}
+			}
+			scripts = append(scripts, suppScript)
+		}
+
+		// 估值
+		var valuationMtt *entity.ValuationIndicators
+		_ = dao.ValuationIndicators.Ctx(ctx).Where(dao.ValuationIndicators.Columns().Symbol, stock.Dm).Scan(&valuationMtt)
+		var valuationScript string
+		if valuationMtt != nil {
+			valuationScript = "[股票相对估值]\n"
+			if valuationMtt.PeTtm != 0 {
+				valuationScript += fmt.Sprintf("现市盈率(TTM):%f, 近三年市盈率30分位置:%f, 近三年市盈率分70位置:%f \n ", valuationMtt.PeTtm, valuationMtt.PePercentile30, valuationMtt.PePercentile70)
+			}
+			if valuationMtt.Pb != 0 {
+				valuationScript += fmt.Sprintf("现市净率(TTM):%f, 近三年市净率30分位置:%f, 近三年市净率分70位置:%f \n ", valuationMtt.Pb, valuationMtt.PbPercentile30, valuationMtt.PbPercentile70)
+			}
+			scripts = append(scripts, valuationScript) // 财报指标
+
+		}
+
 		// 输出格式
 		outputFormat := fmt.Sprintf(`
 			请按此JSON,仅仅输出{}内容,格式输出决策(无Markdown):
@@ -170,7 +279,6 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 			3.开仓必填止盈损
 		`)
 
-		scripts := make([]string, 0)
 		scripts = append(scripts, SystemMessage)
 		scripts = append(scripts, indicatorStr) // 财报指标
 		scripts = append(scripts, financialStr) // 财务指标
@@ -205,6 +313,9 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 			resMap["aiName"] = model.Name
 			resMap["judgmentIndicatorsScript"] = indicatorStr
 			resMap["judgmentFinancialScript"] = financialStr
+			resMap["financialMttScript"] = financialMttScript
+			resMap["supportScript"] = suppScript
+			resMap["valuationScript"] = valuationScript
 			resMap["symbol"] = stockCode.Dm
 			resMap["mc"] = stockCode.Mc
 			if resMap["comprehensiveFlag"] != nil && resMap["comprehensiveFlag"] == true {

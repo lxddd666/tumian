@@ -73,6 +73,9 @@ func (s *sStockSelfCode) SelfCodeIndicatorsApi(ctx context.Context, in *stockin.
 
 			// 资金流向
 			_, _ = service.StockFlowOfFunds().GetFlowOfFunds(ctx, &stockin.GetFlowOfFundsInp{Symbol: stockCode.Dm})
+
+			// rsi
+			service.StockRsiData().GetRsiData(ctx, &stockin.GetRsiDataInp{})
 		})
 	}
 	wg.Done()

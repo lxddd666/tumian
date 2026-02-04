@@ -34,6 +34,9 @@ type StockAiJudgmentColumns struct {
 	Stop                     string // 开仓止损价格
 	JudgmentIndicatorsScript string // 指标判断话术
 	JudgmentFinancialScript  string // 财务判断话术
+	FinancialMttScript       string // 财报mtt评分
+	SupportScript            string // 支撑位压力位
+	ValuationMttScript       string // 估值
 	CreatedAt                string // 创建时间
 	AiId                     string // ai id
 	AiName                   string // ai名称
@@ -55,6 +58,9 @@ var stockAiJudgmentColumns = StockAiJudgmentColumns{
 	Stop:                     "stop",
 	JudgmentIndicatorsScript: "judgment_indicators_script",
 	JudgmentFinancialScript:  "judgment_financial_script",
+	FinancialMttScript:       "financial_mtt_script",
+	SupportScript:            "support_script",
+	ValuationMttScript:       "valuation_mtt_script",
 	CreatedAt:                "created_at",
 	AiId:                     "ai_id",
 	AiName:                   "ai_name",
