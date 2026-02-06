@@ -13,10 +13,9 @@ import (
 
 // StockSupportResistanceDao is the data access object for the table hg_stock_support_resistance.
 type StockSupportResistanceDao struct {
-	table    string                        // table is the underlying table name of the DAO.
-	group    string                        // group is the database configuration group name of the current DAO.
-	columns  StockSupportResistanceColumns // columns contains all the column names of Table for convenient usage.
-	handlers []gdb.ModelHandler            // handlers for customized model modification.
+	table   string                        // table is the underlying table name of the DAO.
+	group   string                        // group is the database configuration group name of the current DAO.
+	columns StockSupportResistanceColumns // columns contains all the column names of Table for convenient usage.
 }
 
 // StockSupportResistanceColumns defines and stores column names for the table hg_stock_support_resistance.
@@ -28,6 +27,7 @@ type StockSupportResistanceColumns struct {
 	Yl        string // 压力位
 	Zc        string // 支撑位
 	CreatedAt string // 创建时间
+	Mc        string // mc
 }
 
 // stockSupportResistanceColumns holds the columns for the table hg_stock_support_resistance.
@@ -39,15 +39,15 @@ var stockSupportResistanceColumns = StockSupportResistanceColumns{
 	Yl:        "yl",
 	Zc:        "zc",
 	CreatedAt: "created_at",
+	Mc:        "mc",
 }
 
 // NewStockSupportResistanceDao creates and returns a new DAO object for table data access.
-func NewStockSupportResistanceDao(handlers ...gdb.ModelHandler) *StockSupportResistanceDao {
+func NewStockSupportResistanceDao() *StockSupportResistanceDao {
 	return &StockSupportResistanceDao{
-		group:    "default",
-		table:    "hg_stock_support_resistance",
-		columns:  stockSupportResistanceColumns,
-		handlers: handlers,
+		group:   "default",
+		table:   "hg_stock_support_resistance",
+		columns: stockSupportResistanceColumns,
 	}
 }
 
@@ -73,11 +73,7 @@ func (dao *StockSupportResistanceDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *StockSupportResistanceDao) Ctx(ctx context.Context) *gdb.Model {
-	model := dao.DB().Model(dao.table)
-	for _, handler := range dao.handlers {
-		model = handler(model)
-	}
-	return model.Safe().Ctx(ctx)
+	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

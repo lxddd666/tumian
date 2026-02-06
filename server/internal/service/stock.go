@@ -15,6 +15,22 @@ import (
 )
 
 type (
+	IStockAtrData interface {
+		// Model atr指标数据表ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取atr指标数据表列表
+		List(ctx context.Context, in *stockin.AtrDataListInp) (list []*stockin.AtrDataListModel, totalCount int, err error)
+		// Export 导出atr指标数据表
+		Export(ctx context.Context, in *stockin.AtrDataListInp) (err error)
+		// Edit 修改/新增atr指标数据表
+		Edit(ctx context.Context, in *stockin.AtrDataEditInp) (err error)
+		// Delete 删除atr指标数据表
+		Delete(ctx context.Context, in *stockin.AtrDataDeleteInp) (err error)
+		// View 获取atr指标数据表指定信息
+		View(ctx context.Context, in *stockin.AtrDataViewInp) (res *stockin.AtrDataViewModel, err error)
+		// GetAtrData 获取atr数据指标
+		GetAtrData(ctx context.Context, in *stockin.GetAtrDataInp) (res *stockin.AtrDataViewModel, err error)
+	}
 	IStockSelfCode interface {
 		// BaiduFinanceCode 百度财经爬虫
 		BaiduFinanceCode(ctx context.Context, in *stockin.SelfCodeIndicatorsApiInp) (err error)
@@ -352,6 +368,7 @@ type (
 )
 
 var (
+	localStockAtrData                  IStockAtrData
 	localStockSelfCode                 IStockSelfCode
 	localStockBollData                 IStockBollData
 	localStockEnterpriseHistoricalData IStockEnterpriseHistoricalData
@@ -374,6 +391,17 @@ var (
 	localStockSupportResistance        IStockSupportResistance
 	localStockTopTenCirculatingHolders IStockTopTenCirculatingHolders
 )
+
+func StockAtrData() IStockAtrData {
+	if localStockAtrData == nil {
+		panic("implement not found for interface IStockAtrData, forgot register?")
+	}
+	return localStockAtrData
+}
+
+func RegisterStockAtrData(i IStockAtrData) {
+	localStockAtrData = i
+}
 
 func StockSelfCode() IStockSelfCode {
 	if localStockSelfCode == nil {

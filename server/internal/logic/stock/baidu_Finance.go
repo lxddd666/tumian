@@ -127,6 +127,7 @@ func scoreMain(ctx context.Context, stock *entity.StockAllCode) (err error) {
 			newScore.ValuationScore = gconv.Float64(re["valuationScore"].(map[string]interface{})["score"])
 			newScore.FinancialScore = gconv.Float64(re["financeScore"].(map[string]interface{})["score"])
 			newScore.RiskScore = gconv.Float64(re["riskScore"].(map[string]interface{})["score"])
+			newScore.Mc = stock.Mc
 			// 财报指标
 			_ = FinancialIndicatorMtt(ctx, stock, re)
 			dao.StockScoreMain.Ctx(ctx).Where(dao.StockScoreMain.Columns().Symbol, stock.Dm).Save(newScore)
@@ -157,6 +158,7 @@ func supportResistance(ctx context.Context, stock *entity.StockAllCode) (err err
 				newSupport.Price = gconv.Float64(analysisData["price"])
 				newSupport.Yl = gconv.Float64(analysisData["yl"])
 				newSupport.Zc = gconv.Float64(analysisData["zc"])
+				newSupport.Mc = stock.Mc
 				dao.StockSupportResistance.Ctx(ctx).Where(dao.StockSupportResistance.Columns().Symbol, stock.Dm).Save(newSupport)
 			}
 

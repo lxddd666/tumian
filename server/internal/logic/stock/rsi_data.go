@@ -22,6 +22,7 @@ import (
 	"hotgo/internal/service"
 	"hotgo/utility/convert"
 	"hotgo/utility/excel"
+	"math"
 )
 
 type sStockRsiData struct{}
@@ -142,115 +143,125 @@ func (s *sStockRsiData) View(ctx context.Context, in *stockin.RsiDataViewInp) (r
 
 // GetRsiData 获取rsi指标数据表指定信息
 func (s *sStockRsiData) GetRsiData(ctx context.Context, in *stockin.GetRsiDataInp) (res *stockin.RsiDataViewModel, err error) {
+	flag, err := s.Model(ctx).Where(dao.MaData.Columns().T, GetRecentWeekday()).Where(dao.MaData.Columns().Symbol, in.Code).Exist()
+	if err != nil {
+		return
+	}
+	if flag {
+		return
+	}
+
 	var codeList []*entity.StockSelfCode
-	err = dao.StockSelfCode.Ctx(ctx).Scan(&codeList)
+	mod := dao.StockSelfCode.Ctx(ctx)
+	if in.Code != "" {
+		mod = mod.Where(dao.StockSelfCode.Columns().Dm, in.Code)
+	}
+	err = mod.Scan(&codeList)
 	if err != nil {
 		return
 	}
 	for _, stock := range codeList {
-		rsiList, _ := CalculateAllRSI(ctx, stock.Dm, 14)
+		rsiList := CalculateRSIFromPine(ctx, stock.Dm, 14)
 		_, _ = dao.RsiData.Ctx(ctx).InsertIgnore(rsiList)
 	}
 
 	return
 }
 
-// CalculateAllRSI 计算所有历史数据的RSI
-func CalculateAllRSI(ctx context.Context, code string, period int) ([]entity.RsiData, error) {
-	var historicalData []*entity.EnterpriseHistoricalData
-	_ = service.StockEnterpriseHistoricalData().Model(ctx).Where(dao.EnterpriseHistoricalData.Columns().Symbol, code).OrderAsc(dao.EnterpriseHistoricalData.Columns().T).Scan(&historicalData)
-	if len(historicalData) < period+1 {
-		return nil, fmt.Errorf("历史数据不足，需要至少%d条数据", period+1)
+// CalculateRSIFromPine 严格按照 TradingView Pine Script v6 的逻辑实现
+// 参数: data 必须按时间升序排列
+func CalculateRSIFromPine(ctx context.Context, code string, period int) []*entity.RsiData {
+	var data []*entity.EnterpriseHistoricalData
+	_ = service.StockEnterpriseHistoricalData().Model(ctx).Where(dao.EnterpriseHistoricalData.Columns().Symbol, code).OrderAsc(dao.EnterpriseHistoricalData.Columns().T).Scan(&data)
+
+	var results []*entity.RsiData
+	n := len(data)
+
+	// 检查数据长度
+	if n == 0 {
+		return results
 	}
 
-	// 准备结果数组
-	result := make([]entity.RsiData, 0, len(historicalData))
-	symbol := historicalData[0].Symbol
+	// 初始化变量
+	var avgGain, avgLoss float64
+	var rsiValue float64
 
-	// 对于每条数据，计算其RSI值
-	for i := period; i < len(historicalData); i++ {
-		// 提取最近period+1天的收盘价
-		prices := make([]float64, 0, period+1)
-		for j := i - period; j <= i; j++ {
-			prices = append(prices, historicalData[j].C)
-		}
+	for i := 0; i < n; i++ {
+		var change, gain, loss float64
 
-		rsiValue, err := calculateRSI(prices, period)
-		if err != nil {
-			// 如果计算失败，可以跳过或记录错误
-			continue
-		}
-
-		// 添加到结果
-		result = append(result, entity.RsiData{
-			T:      historicalData[i].T,
-			Rsi:    rsiValue,
-			Symbol: symbol,
-		})
-	}
-
-	return result, nil
-}
-
-// 计算单条RSI值
-func calculateRSI(prices []float64, period int) (float64, error) {
-	if len(prices) < period+1 {
-		return 0, fmt.Errorf("数据不足，无法计算%d日RSI", period)
-	}
-
-	// 计算价格变化
-	gains := make([]float64, 0, period)
-	losses := make([]float64, 0, period)
-
-	for i := 1; i <= period; i++ {
-		change := prices[i] - prices[i-1]
-		if change > 0 {
-			gains = append(gains, change)
-			losses = append(losses, 0)
+		if i == 0 {
+			// 第一根K线没有变化
+			change = 0
 		} else {
-			gains = append(gains, 0)
-			losses = append(losses, -change)
+			// 计算涨跌幅度
+			change = data[i].C - data[i-1].C
 		}
-	}
 
-	// 计算平均收益和平均损失（初始平均值）
-	avgGain := 0.0
-	avgLoss := 0.0
+		// 分离涨跌幅
+		if change > 0 {
+			gain = change
+			loss = 0
+		} else {
+			gain = 0
+			loss = -change // 注意取正值
+		}
 
-	for i := 0; i < period; i++ {
-		avgGain += gains[i]
-		avgLoss += losses[i]
-	}
-
-	avgGain /= float64(period)
-	avgLoss /= float64(period)
-
-	// 使用平滑移动平均计算后续值（如果数据超过period+1）
-	if len(prices) > period+1 {
-		for i := period + 1; i < len(prices); i++ {
-			change := prices[i] - prices[i-1]
-			gain := 0.0
-			loss := 0.0
-
-			if change > 0 {
-				gain = change
-			} else {
-				loss = -change
-			}
-
-			// 平滑移动平均
+		// 计算逻辑分叉
+		if i < period {
+			// --- 初始化阶段 (前 period 根K线) ---
+			// 累加涨跌幅
+			sumGain, sumLoss := accumulateSums(data, i)
+			// 计算简单平均值 (SMA)
+			avgGain = sumGain / float64(period)
+			avgLoss = sumLoss / float64(period)
+		} else {
+			// --- 迭代阶段 (Wilder's 平滑 RMA) ---
+			// 公式: (prevAvg * (n-1) + current) / n
 			avgGain = (avgGain*float64(period-1) + gain) / float64(period)
 			avgLoss = (avgLoss*float64(period-1) + loss) / float64(period)
 		}
+
+		// --- 计算 RSI 值 ---
+		// 对应脚本逻辑: down == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + up / down))
+		if avgLoss == 0 {
+			rsiValue = 100.0
+		} else if avgGain == 0 {
+			rsiValue = 0.0
+		} else {
+			rs := avgGain / avgLoss
+			rsiValue = 100 - (100 / (1 + rs))
+		}
+
+		// 保留两位小数 (对应脚本中的 precision=2)
+		rsiValue = math.Round(rsiValue*100) / 100
+
+		// 创建结果对象
+		// 注意：TradingView 的 RSI 在第 14 根K线（索引13）开始出值
+		// 但为了对齐时间，通常索引 i 对应 data[i] 的时间
+		// 这里我们从第 'period' 根K线开始记录 (即 i >= period-1)
+		if i >= period-1 {
+			results = append(results, &entity.RsiData{
+				Symbol: data[i].Symbol,
+				T:      data[i].T,
+				Rsi:    rsiValue,
+			})
+		}
 	}
 
-	// 计算RSI
-	if avgLoss == 0 {
-		return 100.0, nil
+	return results
+}
+
+// accumulateSums 辅助函数：计算从开始到索引 i 的总涨幅和总跌幅 (用于初始化)
+func accumulateSums(data []*entity.EnterpriseHistoricalData, endIndex int) (float64, float64) {
+	var sumGain, sumLoss float64
+	// 从索引 1 开始计算变化 (因为索引 0 没有前值)
+	for j := 1; j <= endIndex; j++ {
+		change := data[j].C - data[j-1].C
+		if change > 0 {
+			sumGain += change
+		} else {
+			sumLoss -= change // 减去负数，相当于加正数
+		}
 	}
-
-	rs := avgGain / avgLoss
-	rsi := 100 - (100 / (1 + rs))
-
-	return rsi, nil
+	return sumGain, sumLoss
 }

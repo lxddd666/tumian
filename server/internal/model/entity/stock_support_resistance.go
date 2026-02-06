@@ -17,4 +17,5 @@ type StockSupportResistance struct {
 	Yl        float64     `json:"yl"        orm:"yl"         description:"压力位"`
 	Zc        float64     `json:"zc"        orm:"zc"         description:"支撑位"`
 	CreatedAt *gtime.Time `json:"createdAt" orm:"created_at" description:"创建时间"`
+	Mc        string      `json:"mc"        orm:"mc"         description:"mc"`
 }

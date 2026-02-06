@@ -13,16 +13,16 @@ import (
 
 // StockScoreMainDao is the data access object for the table hg_stock_score_main.
 type StockScoreMainDao struct {
-	table    string                // table is the underlying table name of the DAO.
-	group    string                // group is the database configuration group name of the current DAO.
-	columns  StockScoreMainColumns // columns contains all the column names of Table for convenient usage.
-	handlers []gdb.ModelHandler    // handlers for customized model modification.
+	table   string                // table is the underlying table name of the DAO.
+	group   string                // group is the database configuration group name of the current DAO.
+	columns StockScoreMainColumns // columns contains all the column names of Table for convenient usage.
 }
 
 // StockScoreMainColumns defines and stores column names for the table hg_stock_score_main.
 type StockScoreMainColumns struct {
 	Id                 string // 主键ID
 	Symbol             string // 股票代码
+	Mc                 string // mc
 	T                  string // 评分日期
 	ComprehensiveScore string // 综合评分
 	PriceScore         string // 价格动量评分
@@ -38,6 +38,7 @@ type StockScoreMainColumns struct {
 var stockScoreMainColumns = StockScoreMainColumns{
 	Id:                 "id",
 	Symbol:             "symbol",
+	Mc:                 "mc",
 	T:                  "t",
 	ComprehensiveScore: "comprehensive_score",
 	PriceScore:         "price_score",
@@ -50,12 +51,11 @@ var stockScoreMainColumns = StockScoreMainColumns{
 }
 
 // NewStockScoreMainDao creates and returns a new DAO object for table data access.
-func NewStockScoreMainDao(handlers ...gdb.ModelHandler) *StockScoreMainDao {
+func NewStockScoreMainDao() *StockScoreMainDao {
 	return &StockScoreMainDao{
-		group:    "default",
-		table:    "hg_stock_score_main",
-		columns:  stockScoreMainColumns,
-		handlers: handlers,
+		group:   "default",
+		table:   "hg_stock_score_main",
+		columns: stockScoreMainColumns,
 	}
 }
 
@@ -81,11 +81,7 @@ func (dao *StockScoreMainDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *StockScoreMainDao) Ctx(ctx context.Context) *gdb.Model {
-	model := dao.DB().Model(dao.table)
-	for _, handler := range dao.handlers {
-		model = handler(model)
-	}
-	return model.Safe().Ctx(ctx)
+	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

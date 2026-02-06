@@ -12,6 +12,7 @@ import (
 type StockScoreMain struct {
 	Id                 uint64      `json:"id"                 orm:"id"                  description:"主键ID"`
 	Symbol             string      `json:"symbol"             orm:"symbol"              description:"股票代码"`
+	Mc                 string      `json:"mc"                 orm:"mc"                  description:"mc"`
 	T                  *gtime.Time `json:"t"                  orm:"t"                   description:"评分日期"`
 	ComprehensiveScore float64     `json:"comprehensiveScore" orm:"comprehensive_score" description:"综合评分"`
 	PriceScore         float64     `json:"priceScore"         orm:"price_score"         description:"价格动量评分"`

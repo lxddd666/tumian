@@ -80,6 +80,10 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 
 		var flowOfFunds *entity.FlowOfFunds
 		_ = service.StockFlowOfFunds().Model(ctx).Where(dao.FlowOfFunds.Columns().Symbol, stockCode.Dm).OrderDesc(dao.KdjData.Columns().T).Scan(&flowOfFunds)
+
+		var rsi *entity.RsiData
+		_ = service.StockRsiData().Model(ctx).Where(dao.RsiData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.RsiData.Columns().T).Scan(&rsi)
+
 		// 查询所有指标
 		indicatorStr := fmt.Sprintf(`
 			股票代码[%s]股票名称[%s]
@@ -89,6 +93,7 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 			MA中，m3:%f,m5:%f,m10:%f,m15:%f,m20:%f,m30:%f,m60:%f;
 			BOLL中 上轨:%f,下轨:%f,中轨:%f;
 			KDJ中: K值:%f,D值:%f,J值:%f,;
+			Rsi(14)中: rsi值: %f;
 			资金流向明细:大单动向:%f,大单差分:%f,主买特大单成交额:%f,主卖特大单成交额:%f,主买大单成交额:%f,主卖大单成交额:%f,被动买特大单成交额:%f,被动卖特大单成交额:%f,主买特大单成交额增量:%f,主买大单成交额增量:%f,涨跌动因:%f,主买单总单数:%d,主卖单总单数:%d,主买特大单成交量:%d,成交笔数增量:%d,
 
 			`, stockCode.Dm, stockCode.Mc,
@@ -97,6 +102,7 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 			ma.Ma3, ma.Ma5, ma.Ma10, ma.Ma15, ma.Ma20, ma.Ma30, ma.Ma60,
 			boll.U, boll.D, boll.M,
 			kdj.K, kdj.D, kdj.J,
+			rsi.Rsi,
 			flowOfFunds.Dddx, flowOfFunds.Ddcf, flowOfFunds.Zmbtdcje, flowOfFunds.Zmstdcje, flowOfFunds.Zmbddcje, flowOfFunds.Zmsddcje, flowOfFunds.Bdmbtdcje, flowOfFunds.Bdmstdcje, flowOfFunds.Zmbtdcjzl, flowOfFunds.Zmbddcjzl, flowOfFunds.Zddy, flowOfFunds.Zmbzds, flowOfFunds.Zmszds, flowOfFunds.Zmbtdcjl, flowOfFunds.Cjbszl,
 		)
 
@@ -269,7 +275,7 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 			 "financialJudgment: "仅根据公司股票、财务、财报指标数据判断是否应该买入/卖出，给出一个短中长期投资建议以及理由<100字",
 			 "financialFlag": "仅根据公司股票、财务、财报指标数据判断是否应该买入 true/false",
 			 "comprehensiveJudgment": "综合指标，根据当前数据指标和当前公司的公司股票、财务、财报指标数据来给出一个综合的短中长投资建议理由<100字"
-			 "comprehensiveFlag": "根据综合指标判断是否买入 1买入 2不买(填1/2)"
+			 "comprehensiveFlag": "根据综合指标判断是否买入 1买入 0不买(填1/0)
 			 "target": "根据综合指标，买入必须确定一个预计止盈价",
 			 "stop": "根据综合指标，买入必须确定一个预计止损价"
 			}}
@@ -315,7 +321,7 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 			resMap["judgmentFinancialScript"] = financialStr
 			resMap["financialMttScript"] = financialMttScript
 			resMap["supportScript"] = suppScript
-			resMap["valuationScript"] = valuationScript
+			resMap["valuationMttScript"] = valuationScript
 			resMap["symbol"] = stockCode.Dm
 			resMap["mc"] = stockCode.Mc
 			if resMap["comprehensiveFlag"] != nil && resMap["comprehensiveFlag"] == true {
@@ -394,6 +400,10 @@ func (s *sStockAiJudgment) InvokeIndicatorsJudgment(ctx context.Context, in *sto
 
 		var flowOfFunds *entity.FlowOfFunds
 		_ = service.StockFlowOfFunds().Model(ctx).Where(dao.FlowOfFunds.Columns().Symbol, stockCode.Dm).OrderDesc(dao.KdjData.Columns().T).Scan(&flowOfFunds)
+
+		var rsi *entity.RsiData
+		_ = service.StockRsiData().Model(ctx).Where(dao.RsiData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.RsiData.Columns().T).Scan(&rsi)
+
 		// 查询所有指标
 		indicatorStr := fmt.Sprintf(`
 			股票代码[%s]股票名称[%s]
