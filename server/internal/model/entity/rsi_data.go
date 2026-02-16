@@ -16,4 +16,7 @@ type RsiData struct {
 	Rsi       float64     `json:"rsi"       orm:"rsi"        description:"rsi"`
 	CreatedAt *gtime.Time `json:"createdAt" orm:"created_at" description:"数据创建时间"`
 	UpdatedAt *gtime.Time `json:"updatedAt" orm:"updated_at" description:"数据更新时间"`
+	Rsi6      float64     `json:"rsi6"      orm:"rsi_6"      description:""`
+	Rsi12     float64     `json:"rsi12"     orm:"rsi_12"     description:""`
+	Rsi24     float64     `json:"rsi24"     orm:"rsi_24"     description:""`
 }

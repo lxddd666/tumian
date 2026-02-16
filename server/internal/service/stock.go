@@ -59,6 +59,20 @@ type (
 		// GetBoll 获取布林带(BOLL)指标数据
 		GetBoll(ctx context.Context, in *stockin.BollDataGetBollInp) (data []*entity.BollData, err error)
 	}
+	IStockCciData interface {
+		// Model cci指标数据表ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取cci指标数据表列表
+		List(ctx context.Context, in *stockin.CciDataListInp) (list []*stockin.CciDataListModel, totalCount int, err error)
+		// Export 导出cci指标数据表
+		Export(ctx context.Context, in *stockin.CciDataListInp) (err error)
+		// Edit 修改/新增cci指标数据表
+		Edit(ctx context.Context, in *stockin.CciDataEditInp) (err error)
+		// Delete 删除cci指标数据表
+		Delete(ctx context.Context, in *stockin.CciDataDeleteInp) (err error)
+		// View 获取cci指标数据表指定信息
+		View(ctx context.Context, in *stockin.CciDataViewInp) (res *stockin.CciDataViewModel, err error)
+	}
 	IStockEnterpriseHistoricalData interface {
 		// Model 企业级历史行情数据表 (K线数据)ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -74,6 +88,20 @@ type (
 		View(ctx context.Context, in *stockin.EnterpriseHistoricalDataViewInp) (res *stockin.EnterpriseHistoricalDataViewModel, err error)
 		// GetEnterpriseHistoricalData 获取企业级历史行情数据表数据
 		GetEnterpriseHistoricalData(ctx context.Context, in *stockin.EnterpriseHistoricalDataGetEnterpriseHistoricalDataInp) (data []*entity.EnterpriseHistoricalData, err error)
+	}
+	IStockFastkData interface {
+		// Model fastk指标数据表ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取fastk指标数据表列表
+		List(ctx context.Context, in *stockin.FastkDataListInp) (list []*stockin.FastkDataListModel, totalCount int, err error)
+		// Export 导出fastk指标数据表
+		Export(ctx context.Context, in *stockin.FastkDataListInp) (err error)
+		// Edit 修改/新增fastk指标数据表
+		Edit(ctx context.Context, in *stockin.FastkDataEditInp) (err error)
+		// Delete 删除fastk指标数据表
+		Delete(ctx context.Context, in *stockin.FastkDataDeleteInp) (err error)
+		// View 获取fastk指标数据表指定信息
+		View(ctx context.Context, in *stockin.FastkDataViewInp) (res *stockin.FastkDataViewModel, err error)
 	}
 	IStockFinancialIndicators interface {
 		// Model 财务指标分析表ORM模型
@@ -155,6 +183,20 @@ type (
 		// GetKdj 获取KDJ随机指标数据
 		GetKdj(ctx context.Context, in *stockin.KdjDataGetKdjInp) (data []*entity.KdjData, err error)
 	}
+	IStockKstData interface {
+		// Model kst指标数据表ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取kst指标数据表列表
+		List(ctx context.Context, in *stockin.KstDataListInp) (list []*stockin.KstDataListModel, totalCount int, err error)
+		// Export 导出kst指标数据表
+		Export(ctx context.Context, in *stockin.KstDataListInp) (err error)
+		// Edit 修改/新增kst指标数据表
+		Edit(ctx context.Context, in *stockin.KstDataEditInp) (err error)
+		// Delete 删除kst指标数据表
+		Delete(ctx context.Context, in *stockin.KstDataDeleteInp) (err error)
+		// View 获取kst指标数据表指定信息
+		View(ctx context.Context, in *stockin.KstDataViewInp) (res *stockin.KstDataViewModel, err error)
+	}
 	IStockMaData interface {
 		// Model 移动平均线(MA)指标数据表ORM模型
 		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
@@ -186,6 +228,20 @@ type (
 		View(ctx context.Context, in *stockin.MacdDataViewInp) (res *stockin.MacdDataViewModel, err error)
 		// GetMacd 获取MACD指标数据
 		GetMacd(ctx context.Context, in *stockin.MacdDataGetMacdInp) (data []*entity.MacdData, err error)
+	}
+	IStockMomData interface {
+		// Model mom指标数据表ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取mom指标数据表列表
+		List(ctx context.Context, in *stockin.MomDataListInp) (list []*stockin.MomDataListModel, totalCount int, err error)
+		// Export 导出mom指标数据表
+		Export(ctx context.Context, in *stockin.MomDataListInp) (err error)
+		// Edit 修改/新增mom指标数据表
+		Edit(ctx context.Context, in *stockin.MomDataEditInp) (err error)
+		// Delete 删除mom指标数据表
+		Delete(ctx context.Context, in *stockin.MomDataDeleteInp) (err error)
+		// View 获取mom指标数据表指定信息
+		View(ctx context.Context, in *stockin.MomDataViewInp) (res *stockin.MomDataViewModel, err error)
 	}
 	IStockQuarterlyProfit interface {
 		// Model 季度利润数据表 (近一年各季度)ORM模型
@@ -250,6 +306,20 @@ type (
 		View(ctx context.Context, in *stockin.ShareholderCountViewInp) (res *stockin.ShareholderCountViewModel, err error)
 		// GetShareholderCount 获取公司股东户数统计表数据
 		GetShareholderCount(ctx context.Context, in *stockin.ShareholderCountGetShareholderCountInp) (data []*entity.ShareholderCount, err error)
+	}
+	IStockSlowStochasticData interface {
+		// Model stoch指标数据表ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取stoch指标数据表列表
+		List(ctx context.Context, in *stockin.SlowStochasticDataListInp) (list []*stockin.SlowStochasticDataListModel, totalCount int, err error)
+		// Export 导出stoch指标数据表
+		Export(ctx context.Context, in *stockin.SlowStochasticDataListInp) (err error)
+		// Edit 修改/新增stoch指标数据表
+		Edit(ctx context.Context, in *stockin.SlowStochasticDataEditInp) (err error)
+		// Delete 删除stoch指标数据表
+		Delete(ctx context.Context, in *stockin.SlowStochasticDataDeleteInp) (err error)
+		// View 获取stoch指标数据表指定信息
+		View(ctx context.Context, in *stockin.SlowStochasticDataViewInp) (res *stockin.SlowStochasticDataViewModel, err error)
 	}
 	IStockAiJudgment interface {
 		// Model ai 选股判断ORM模型
@@ -365,24 +435,43 @@ type (
 		// GetTopTenCirculatingHolders 获取公司十大流通股东表数据
 		GetTopTenCirculatingHolders(ctx context.Context, in *stockin.TopTenCirculatingHoldersGetTopTenCirculatingHoldersInp) (data []*entity.TopTenCirculatingHolders, err error)
 	}
+	IStockWilliamsData interface {
+		// Model wmsr指标数据表ORM模型
+		Model(ctx context.Context, option ...*handler.Option) *gdb.Model
+		// List 获取wmsr指标数据表列表
+		List(ctx context.Context, in *stockin.WilliamsDataListInp) (list []*stockin.WilliamsDataListModel, totalCount int, err error)
+		// Export 导出wmsr指标数据表
+		Export(ctx context.Context, in *stockin.WilliamsDataListInp) (err error)
+		// Edit 修改/新增wmsr指标数据表
+		Edit(ctx context.Context, in *stockin.WilliamsDataEditInp) (err error)
+		// Delete 删除wmsr指标数据表
+		Delete(ctx context.Context, in *stockin.WilliamsDataDeleteInp) (err error)
+		// View 获取wmsr指标数据表指定信息
+		View(ctx context.Context, in *stockin.WilliamsDataViewInp) (res *stockin.WilliamsDataViewModel, err error)
+	}
 )
 
 var (
 	localStockAtrData                  IStockAtrData
 	localStockSelfCode                 IStockSelfCode
 	localStockBollData                 IStockBollData
+	localStockCciData                  IStockCciData
 	localStockEnterpriseHistoricalData IStockEnterpriseHistoricalData
+	localStockFastkData                IStockFastkData
 	localStockFinancialIndicators      IStockFinancialIndicators
 	localStockFlowOfFunds              IStockFlowOfFunds
 	localStockFundStockHolding         IStockFundStockHolding
 	localStockIncomeStatement          IStockIncomeStatement
 	localStockKdjData                  IStockKdjData
+	localStockKstData                  IStockKstData
 	localStockMaData                   IStockMaData
 	localStockMacdData                 IStockMacdData
+	localStockMomData                  IStockMomData
 	localStockQuarterlyProfit          IStockQuarterlyProfit
 	localStockRsiData                  IStockRsiData
 	localStockShareholderChange        IStockShareholderChange
 	localStockShareholderCount         IStockShareholderCount
+	localStockSlowStochasticData       IStockSlowStochasticData
 	localStockAiJudgment               IStockAiJudgment
 	localStockBasicInfo                IStockBasicInfo
 	localStockList                     IStockList
@@ -390,6 +479,7 @@ var (
 	localStockSelfAi                   IStockSelfAi
 	localStockSupportResistance        IStockSupportResistance
 	localStockTopTenCirculatingHolders IStockTopTenCirculatingHolders
+	localStockWilliamsData             IStockWilliamsData
 )
 
 func StockAtrData() IStockAtrData {
@@ -425,6 +515,17 @@ func RegisterStockBollData(i IStockBollData) {
 	localStockBollData = i
 }
 
+func StockCciData() IStockCciData {
+	if localStockCciData == nil {
+		panic("implement not found for interface IStockCciData, forgot register?")
+	}
+	return localStockCciData
+}
+
+func RegisterStockCciData(i IStockCciData) {
+	localStockCciData = i
+}
+
 func StockEnterpriseHistoricalData() IStockEnterpriseHistoricalData {
 	if localStockEnterpriseHistoricalData == nil {
 		panic("implement not found for interface IStockEnterpriseHistoricalData, forgot register?")
@@ -434,6 +535,17 @@ func StockEnterpriseHistoricalData() IStockEnterpriseHistoricalData {
 
 func RegisterStockEnterpriseHistoricalData(i IStockEnterpriseHistoricalData) {
 	localStockEnterpriseHistoricalData = i
+}
+
+func StockFastkData() IStockFastkData {
+	if localStockFastkData == nil {
+		panic("implement not found for interface IStockFastkData, forgot register?")
+	}
+	return localStockFastkData
+}
+
+func RegisterStockFastkData(i IStockFastkData) {
+	localStockFastkData = i
 }
 
 func StockFinancialIndicators() IStockFinancialIndicators {
@@ -491,6 +603,17 @@ func RegisterStockKdjData(i IStockKdjData) {
 	localStockKdjData = i
 }
 
+func StockKstData() IStockKstData {
+	if localStockKstData == nil {
+		panic("implement not found for interface IStockKstData, forgot register?")
+	}
+	return localStockKstData
+}
+
+func RegisterStockKstData(i IStockKstData) {
+	localStockKstData = i
+}
+
 func StockMaData() IStockMaData {
 	if localStockMaData == nil {
 		panic("implement not found for interface IStockMaData, forgot register?")
@@ -511,6 +634,17 @@ func StockMacdData() IStockMacdData {
 
 func RegisterStockMacdData(i IStockMacdData) {
 	localStockMacdData = i
+}
+
+func StockMomData() IStockMomData {
+	if localStockMomData == nil {
+		panic("implement not found for interface IStockMomData, forgot register?")
+	}
+	return localStockMomData
+}
+
+func RegisterStockMomData(i IStockMomData) {
+	localStockMomData = i
 }
 
 func StockQuarterlyProfit() IStockQuarterlyProfit {
@@ -555,6 +689,17 @@ func StockShareholderCount() IStockShareholderCount {
 
 func RegisterStockShareholderCount(i IStockShareholderCount) {
 	localStockShareholderCount = i
+}
+
+func StockSlowStochasticData() IStockSlowStochasticData {
+	if localStockSlowStochasticData == nil {
+		panic("implement not found for interface IStockSlowStochasticData, forgot register?")
+	}
+	return localStockSlowStochasticData
+}
+
+func RegisterStockSlowStochasticData(i IStockSlowStochasticData) {
+	localStockSlowStochasticData = i
 }
 
 func StockAiJudgment() IStockAiJudgment {
@@ -632,4 +777,15 @@ func StockTopTenCirculatingHolders() IStockTopTenCirculatingHolders {
 
 func RegisterStockTopTenCirculatingHolders(i IStockTopTenCirculatingHolders) {
 	localStockTopTenCirculatingHolders = i
+}
+
+func StockWilliamsData() IStockWilliamsData {
+	if localStockWilliamsData == nil {
+		panic("implement not found for interface IStockWilliamsData, forgot register?")
+	}
+	return localStockWilliamsData
+}
+
+func RegisterStockWilliamsData(i IStockWilliamsData) {
+	localStockWilliamsData = i
 }

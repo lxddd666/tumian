@@ -25,6 +25,7 @@ type StockSelfCodeColumns struct {
 	Mc        string // 股票名称
 	Jys       string // 交易所
 	CreatedAt string // 创建时间
+	Industry  string // industry
 }
 
 // stockSelfCodeColumns holds the columns for the table hg_stock_self_code.
@@ -33,6 +34,7 @@ var stockSelfCodeColumns = StockSelfCodeColumns{
 	Mc:        "mc",
 	Jys:       "jys",
 	CreatedAt: "created_at",
+	Industry:  "industry",
 }
 
 // NewStockSelfCodeDao creates and returns a new DAO object for table data access.

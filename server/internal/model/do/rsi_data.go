@@ -18,4 +18,7 @@ type RsiData struct {
 	Rsi       any         // rsi
 	CreatedAt *gtime.Time // 数据创建时间
 	UpdatedAt *gtime.Time // 数据更新时间
+	Rsi6      any         //
+	Rsi12     any         //
+	Rsi24     any         //
 }

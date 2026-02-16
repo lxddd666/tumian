@@ -13,9 +13,10 @@ import (
 
 // StockSupportResistanceDao is the data access object for the table hg_stock_support_resistance.
 type StockSupportResistanceDao struct {
-	table   string                        // table is the underlying table name of the DAO.
-	group   string                        // group is the database configuration group name of the current DAO.
-	columns StockSupportResistanceColumns // columns contains all the column names of Table for convenient usage.
+	table    string                        // table is the underlying table name of the DAO.
+	group    string                        // group is the database configuration group name of the current DAO.
+	columns  StockSupportResistanceColumns // columns contains all the column names of Table for convenient usage.
+	handlers []gdb.ModelHandler            // handlers for customized model modification.
 }
 
 // StockSupportResistanceColumns defines and stores column names for the table hg_stock_support_resistance.
@@ -43,11 +44,12 @@ var stockSupportResistanceColumns = StockSupportResistanceColumns{
 }
 
 // NewStockSupportResistanceDao creates and returns a new DAO object for table data access.
-func NewStockSupportResistanceDao() *StockSupportResistanceDao {
+func NewStockSupportResistanceDao(handlers ...gdb.ModelHandler) *StockSupportResistanceDao {
 	return &StockSupportResistanceDao{
-		group:   "default",
-		table:   "hg_stock_support_resistance",
-		columns: stockSupportResistanceColumns,
+		group:    "default",
+		table:    "hg_stock_support_resistance",
+		columns:  stockSupportResistanceColumns,
+		handlers: handlers,
 	}
 }
 
@@ -73,7 +75,11 @@ func (dao *StockSupportResistanceDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *StockSupportResistanceDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+	model := dao.DB().Model(dao.table)
+	for _, handler := range dao.handlers {
+		model = handler(model)
+	}
+	return model.Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

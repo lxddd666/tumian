@@ -30,7 +30,7 @@ func (s *sStockSelfCode) BaiduFinanceCode(ctx context.Context, in *stockin.SelfC
 	}
 
 	// 创建容量为3的协程池
-	pool := make(chan struct{}, 20)
+	pool := make(chan struct{}, 100)
 
 	// 创建WaitGroup等待所有任务完成
 	var wg sync.WaitGroup

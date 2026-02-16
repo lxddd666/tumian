@@ -27,6 +27,9 @@ type RsiDataColumns struct {
 	Rsi       string // rsi
 	CreatedAt string // 数据创建时间
 	UpdatedAt string // 数据更新时间
+	Rsi6      string //
+	Rsi12     string //
+	Rsi24     string //
 }
 
 // rsiDataColumns holds the columns for the table hg_rsi_data.
@@ -37,6 +40,9 @@ var rsiDataColumns = RsiDataColumns{
 	Rsi:       "rsi",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
+	Rsi6:      "rsi_6",
+	Rsi12:     "rsi_12",
+	Rsi24:     "rsi_24",
 }
 
 // NewRsiDataDao creates and returns a new DAO object for table data access.

@@ -16,4 +16,5 @@ type StockSelfCode struct {
 	Mc        any         // 股票名称
 	Jys       any         // 交易所
 	CreatedAt *gtime.Time // 创建时间
+	Industry  any         // industry
 }

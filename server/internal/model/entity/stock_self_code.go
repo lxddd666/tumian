@@ -14,4 +14,5 @@ type StockSelfCode struct {
 	Mc        string      `json:"mc"        orm:"mc"         description:"股票名称"`
 	Jys       string      `json:"jys"       orm:"jys"        description:"交易所"`
 	CreatedAt *gtime.Time `json:"createdAt" orm:"created_at" description:"创建时间"`
+	Industry  string      `json:"industry"  orm:"industry"   description:"industry"`
 }

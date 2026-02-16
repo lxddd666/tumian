@@ -21,7 +21,7 @@ type StockAllCodeDao struct {
 
 // StockAllCodeColumns defines and stores column names for the table hg_stock_all_code.
 type StockAllCodeColumns struct {
-	Dm        string // 股票代码
+	Dm        string //
 	Mc        string // 股票名称
 	Jys       string // 交易所
 	CreatedAt string // 创建时间

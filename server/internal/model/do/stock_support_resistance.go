@@ -12,12 +12,12 @@ import (
 // StockSupportResistance is the golang structure of table hg_stock_support_resistance for DAO operations like Where/Data.
 type StockSupportResistance struct {
 	g.Meta    `orm:"table:hg_stock_support_resistance, do:true"`
-	Id        interface{} // 主键ID
+	Id        any         // 主键ID
 	T         *gtime.Time // 时间
-	Symbol    interface{} // 股票或标的代码 (例如: AAPL, 000001.SZ)
-	Price     interface{} // 当前股票价格
-	Yl        interface{} // 压力位
-	Zc        interface{} // 支撑位
+	Symbol    any         // 股票或标的代码 (例如: AAPL, 000001.SZ)
+	Price     any         // 当前股票价格
+	Yl        any         // 压力位
+	Zc        any         // 支撑位
 	CreatedAt *gtime.Time // 创建时间
-	Mc        interface{} // mc
+	Mc        any         // mc
 }

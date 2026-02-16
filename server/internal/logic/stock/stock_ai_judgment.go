@@ -237,7 +237,7 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 
 			if support.Zc != 0 || support.Yl != 0 {
 				if support.Price != 0 {
-					suppScript = fmt.Sprintf("股票如今价格:%f，", support.Price)
+					suppScript = fmt.Sprintf("股票如今价格:%f，", kLine.C)
 
 					if support.Zc != 0 {
 						suppScript += fmt.Sprintf("股票价格支撑位:%f，", support.Zc)
