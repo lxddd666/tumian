@@ -9,19 +9,25 @@ package stock
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
+	"github.com/gogf/gf/v2/util/gconv"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
 	"hotgo/utility/convert"
 	"hotgo/utility/excel"
-
-	"github.com/gogf/gf/v2/database/gdb"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/util/gconv"
+	"io"
+	"log"
+	"net/http"
+	"time"
 )
 
 type sStockCciData struct{}
@@ -136,6 +142,86 @@ func (s *sStockCciData) View(ctx context.Context, in *stockin.CciDataViewInp) (r
 	if err = s.Model(ctx).WherePri(in.Id).Scan(&res); err != nil {
 		err = gerror.Wrap(err, "获取cci指标数据表信息，请稍后重试！")
 		return
+	}
+	return
+}
+
+// GetCci 获取cci指标
+func (s *sStockCciData) GetCci(ctx context.Context, in *stockin.GetCciDataInp) (data []*entity.CciData, err error) {
+
+	code := gstr.Split(in.Symbol, ".")[0]
+
+	flag, err := s.Model(ctx).Where(dao.MacdData.Columns().T, GetRecentWeekday()).Where(dao.CciData.Columns().Symbol, in.Symbol).Exist()
+	if err != nil {
+		return
+	}
+	if flag {
+		return
+	}
+
+	// 目标URL
+	url := fmt.Sprintf("https://finance.pae.baidu.com/sapi/v1/get_indicators_graph?code=%s&eventType=1014&finClientType=pc&financeType=stock&market=ab&period=dayK", code)
+
+	// 发起GET请求
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal("请求失败:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// 读取响应体
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("读取数据失败:", err)
+		return
+	}
+
+	var result map[string]interface{}
+	err = gconv.Scan(body, &result)
+	if err != nil {
+		err = gerror.Wrap(err, "解析body失败")
+		return
+	}
+	// 打印JSON结果
+	if result["Result"] != nil {
+		resultMap := result["Result"].(map[string]interface{})
+		if resultMap == nil {
+			return
+		}
+		marketData := resultMap["market_data"].(string)
+		list := gstr.Split(marketData, ";")
+	LoopCci:
+		for _, l := range list {
+			cci := new(entity.CciData)
+			cci.Symbol = in.Symbol
+			cciData := gstr.Split(l, ",")
+			for i, c := range cciData {
+				// 20171116,18.040,17.580
+				switch i {
+				case 0:
+					// 时间
+					t, tErr := time.Parse("20060102", c)
+					if tErr != nil {
+						err = tErr
+						return
+					}
+
+					// 格式化为目标格式
+					formatted := t.Format("2006-01-02")
+					cci.T = gtime.New(formatted)
+				case 1:
+					if gstr.Contains(c, "准备上号？") {
+						continue LoopCci
+					}
+					cci.Cci = gconv.Float64(c)
+				}
+			}
+			data = append(data, cci)
+		}
+	}
+	if len(data) > 0 {
+		_, _ = s.Model(ctx).InsertIgnore(data)
 	}
 	return
 }

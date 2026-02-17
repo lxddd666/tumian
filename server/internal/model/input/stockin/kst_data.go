@@ -66,6 +66,11 @@ type KstDataViewInp struct {
 	Id int64 `json:"id" v:"required#自增主键不能为空" dc:"自增主键"`
 }
 
+// GetKstDataInp 获取指定kst指标数据表信息
+type GetKstDataInp struct {
+	Symbol string `json:"symbol" dc:"自增主键"`
+}
+
 func (in *KstDataViewInp) Filter(ctx context.Context) (err error) {
 	return
 }

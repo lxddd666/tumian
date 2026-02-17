@@ -57,3 +57,11 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetStochReq 获取stoch指标数据表
+type GetStochReq struct {
+	g.Meta `path:"/slowStochasticData/getStoch" method:"get" tags:"stoch指标数据表" summary:"获取stoch指标数据表(百度财经)"`
+	stockin.GetStochDataInp
+}
+
+type GetStochRes struct{}

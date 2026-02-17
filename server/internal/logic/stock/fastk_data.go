@@ -9,13 +9,20 @@ package stock
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
 	"hotgo/utility/convert"
 	"hotgo/utility/excel"
+	"io"
+	"log"
+	"net/http"
+	"time"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -136,6 +143,90 @@ func (s *sStockFastkData) View(ctx context.Context, in *stockin.FastkDataViewInp
 	if err = s.Model(ctx).WherePri(in.Id).Scan(&res); err != nil {
 		err = gerror.Wrap(err, "获取fastk指标数据表信息，请稍后重试！")
 		return
+	}
+	return
+}
+
+// GetFastk 获取GetFastk指标
+func (s *sStockFastkData) GetFastk(ctx context.Context, in *stockin.GetFastkDataInp) (data []*entity.FastkData, err error) {
+	code := gstr.Split(in.Symbol, ".")[0]
+
+	flag, err := s.Model(ctx).Where(dao.MacdData.Columns().T, GetRecentWeekday()).Where(dao.FastkData.Columns().Symbol, in.Symbol).Exist()
+	if err != nil {
+		return
+	}
+	if flag {
+		return
+	}
+
+	// 目标URL
+	url := fmt.Sprintf("https://finance.pae.baidu.com/sapi/v1/get_indicators_graph?code=%s&eventType=1025&finClientType=pc&financeType=stock&market=ab&period=dayK&finClientType=pc", code)
+
+	// 发起GET请求
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal("请求失败:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// 读取响应体
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("读取数据失败:", err)
+		return
+	}
+
+	var result map[string]interface{}
+	err = gconv.Scan(body, &result)
+	if err != nil {
+		err = gerror.Wrap(err, "解析body失败")
+		return
+	}
+	// 打印JSON结果
+	if result["Result"] != nil {
+		resultMap := result["Result"].(map[string]interface{})
+		if resultMap == nil {
+			return
+		}
+		marketData := resultMap["market_data"].(string)
+		list := gstr.Split(marketData, ";")
+	LoopCci:
+		for _, l := range list {
+			Fastk := new(entity.FastkData)
+			Fastk.Symbol = in.Symbol
+			cciData := gstr.Split(l, ",")
+			for i, c := range cciData {
+				// 20171116,18.040,17.580
+				switch i {
+				case 0:
+					// 时间
+					t, tErr := time.Parse("20060102", c)
+					if tErr != nil {
+						err = tErr
+						return
+					}
+
+					// 格式化为目标格式
+					formatted := t.Format("2006-01-02")
+					Fastk.T = gtime.New(formatted)
+				case 1:
+					if gstr.Contains(c, "--") {
+						continue LoopCci
+					}
+					Fastk.K = gconv.Float64(c)
+				case 2:
+					if gstr.Contains(c, "--") {
+						continue LoopCci
+					}
+					Fastk.D = gconv.Float64(c)
+				}
+			}
+			data = append(data, Fastk)
+		}
+	}
+	if len(data) > 0 {
+		_, _ = s.Model(ctx).InsertIgnore(data)
 	}
 	return
 }

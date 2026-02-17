@@ -64,6 +64,10 @@ type MomDataViewInp struct {
 	Id int64 `json:"id" v:"required#自增主键不能为空" dc:"自增主键"`
 }
 
+type GetMomDataInp struct {
+	Symbol string `json:"symbol"  dc:"自增主键"`
+}
+
 func (in *MomDataViewInp) Filter(ctx context.Context) (err error) {
 	return
 }

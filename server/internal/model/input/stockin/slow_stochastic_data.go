@@ -66,6 +66,10 @@ type SlowStochasticDataViewInp struct {
 	Id int64 `json:"id" v:"required#自增主键不能为空" dc:"自增主键"`
 }
 
+type GetStochDataInp struct {
+	Symbol string `json:"symbol"  dc:"代码"`
+}
+
 func (in *SlowStochasticDataViewInp) Filter(ctx context.Context) (err error) {
 	return
 }

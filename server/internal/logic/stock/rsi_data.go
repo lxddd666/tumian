@@ -13,6 +13,8 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
@@ -22,7 +24,11 @@ import (
 	"hotgo/internal/service"
 	"hotgo/utility/convert"
 	"hotgo/utility/excel"
+	"io"
+	"log"
 	"math"
+	"net/http"
+	"time"
 )
 
 type sStockRsiData struct{}
@@ -161,10 +167,89 @@ func (s *sStockRsiData) GetRsiData(ctx context.Context, in *stockin.GetRsiDataIn
 		return
 	}
 	for _, stock := range codeList {
-		rsiList := CalculateRSIFromPine(ctx, stock.Dm, 14)
+		rsiList := BaiduRsi(ctx, stock.Dm)
 		_, _ = dao.RsiData.Ctx(ctx).InsertIgnore(rsiList)
 	}
 
+	return
+}
+
+func BaiduRsi(ctx context.Context, symbol string) (data []*entity.RsiData) {
+	code := gstr.Split(symbol, ".")[0]
+
+	// 目标URL
+	url := fmt.Sprintf("https://finance.pae.baidu.com/sapi/v1/get_indicators_graph?code=%s&eventType=1003&finClientType=pc&financeType=stock&market=ab&period=dayK&finClientType=pc", code)
+
+	// 发起GET请求
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal("请求失败:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// 读取响应体
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("读取数据失败:", err)
+		return
+	}
+
+	var result map[string]interface{}
+	err = gconv.Scan(body, &result)
+	if err != nil {
+		err = gerror.Wrap(err, "解析body失败")
+		return
+	}
+	// 打印JSON结果
+	if result["Result"] != nil {
+		resultMap := result["Result"].(map[string]interface{})
+		if resultMap == nil {
+			return
+		}
+		marketData := resultMap["market_data"].(string)
+		list := gstr.Split(marketData, ";")
+	LoopCci:
+		for _, l := range list {
+			cci := new(entity.RsiData)
+			cci.Symbol = symbol
+			cciData := gstr.Split(l, ",")
+			for i, c := range cciData {
+				// 20171116,18.040,17.580
+				switch i {
+				case 0:
+					// 时间
+					t, tErr := time.Parse("20060102", c)
+					if tErr != nil {
+						err = tErr
+						return
+					}
+
+					// 格式化为目标格式
+					formatted := t.Format("2006-01-02")
+					cci.T = gtime.New(formatted)
+				case 1:
+					if gstr.Contains(c, "--") {
+						continue LoopCci
+					}
+					cci.Rsi6 = gconv.Float64(c)
+
+				case 2:
+					if gstr.Contains(c, "--") {
+						continue LoopCci
+					}
+					cci.Rsi14 = gconv.Float64(c)
+					cci.Rsi = gconv.Float64(c)
+				case 3:
+					if gstr.Contains(c, "--") {
+						continue LoopCci
+					}
+					cci.Rsi24 = gconv.Float64(c)
+				}
+			}
+			data = append(data, cci)
+		}
+	}
 	return
 }
 

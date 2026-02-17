@@ -65,3 +65,9 @@ func (c *cSlowStochasticData) Delete(ctx context.Context, req *slowstochasticdat
 	err = service.StockSlowStochasticData().Delete(ctx, &req.SlowStochasticDataDeleteInp)
 	return
 }
+
+// GetStoch 获取stoch指标数据表
+func (c *cSlowStochasticData) GetStoch(ctx context.Context, req *slowstochasticdata.GetStochReq) (res []*slowstochasticdata.GetStochRes, err error) {
+	_, err = service.StockSlowStochasticData().GetStoch(ctx, &req.GetStochDataInp)
+	return
+}

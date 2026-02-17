@@ -9,13 +9,20 @@ package stock
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
 	"hotgo/internal/dao"
 	"hotgo/internal/library/hgorm/handler"
+	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/form"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
 	"hotgo/utility/convert"
 	"hotgo/utility/excel"
+	"io"
+	"log"
+	"net/http"
+	"time"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -138,4 +145,85 @@ func (s *sStockMomData) View(ctx context.Context, in *stockin.MomDataViewInp) (r
 		return
 	}
 	return
+}
+
+// GetMom 获取mom指标
+func (s *sStockMomData) GetMom(ctx context.Context, in *stockin.GetMomDataInp) (data []*entity.MomData, err error) {
+	code := gstr.Split(in.Symbol, ".")[0]
+
+	flag, err := s.Model(ctx).Where(dao.MacdData.Columns().T, GetRecentWeekday()).Where(dao.SlowStochasticData.Columns().Symbol, in.Symbol).Exist()
+	if err != nil {
+		return
+	}
+	if flag {
+		return
+	}
+
+	// 目标URL
+	url := fmt.Sprintf("https://finance.pae.baidu.com/sapi/v1/get_indicators_graph?code=%s&eventType=1005&finClientType=pc&financeType=stock&market=ab&period=dayK&finClientType=pc", code)
+
+	// 发起GET请求
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal("请求失败:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// 读取响应体
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("读取数据失败:", err)
+		return
+	}
+
+	var result map[string]interface{}
+	err = gconv.Scan(body, &result)
+	if err != nil {
+		err = gerror.Wrap(err, "解析body失败")
+		return
+	}
+	// 打印JSON结果
+	if result["Result"] != nil {
+		resultMap := result["Result"].(map[string]interface{})
+		if resultMap == nil {
+			return
+		}
+		marketData := resultMap["market_data"].(string)
+		list := gstr.Split(marketData, ";")
+	LoopCci:
+		for _, l := range list {
+			mom := new(entity.MomData)
+			mom.Symbol = in.Symbol
+			cciData := gstr.Split(l, ",")
+			for i, c := range cciData {
+				// 20171116,18.040,17.580
+				switch i {
+				case 0:
+					// 时间
+					t, tErr := time.Parse("20060102", c)
+					if tErr != nil {
+						err = tErr
+						return
+					}
+
+					// 格式化为目标格式
+					formatted := t.Format("2006-01-02")
+					mom.T = gtime.New(formatted)
+				case 1:
+					if gstr.Contains(c, "--") {
+						continue LoopCci
+					}
+					mom.Mon = gconv.Float64(c)
+
+				}
+			}
+			data = append(data, mom)
+		}
+		if len(data) > 0 {
+			_, _ = s.Model(ctx).InsertIgnore(data)
+		}
+	}
+	return
+
 }

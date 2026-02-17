@@ -55,6 +55,11 @@ type FastkDataDeleteInp struct {
 	Id interface{} `json:"id" v:"required#自增主键不能为空" dc:"自增主键"`
 }
 
+// GetFastkDataInp 获取fastk指标数据表
+type GetFastkDataInp struct {
+	Symbol string `json:"symbol" dc:"自增主键"`
+}
+
 func (in *FastkDataDeleteInp) Filter(ctx context.Context) (err error) {
 	return
 }

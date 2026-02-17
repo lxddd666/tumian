@@ -57,3 +57,11 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetMomReq 获取mom指标数据表
+type GetMomReq struct {
+	g.Meta `path:"/slowStochasticData/getMom" method:"get" tags:"mom指标数据表" summary:"获取mom指标数据表(百度财经)"`
+	stockin.GetMomDataInp
+}
+
+type GetMomRes struct{}

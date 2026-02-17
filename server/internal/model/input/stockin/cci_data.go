@@ -64,6 +64,11 @@ type CciDataViewInp struct {
 	Id int64 `json:"id" v:"required#自增主键不能为空" dc:"自增主键"`
 }
 
+// GetCciDataInp 获取指定cci指标数据表信息
+type GetCciDataInp struct {
+	Symbol string `json:"symbol"  dc:"代码"`
+}
+
 func (in *CciDataViewInp) Filter(ctx context.Context) (err error) {
 	return
 }

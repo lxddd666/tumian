@@ -65,3 +65,9 @@ func (c *cMomData) Delete(ctx context.Context, req *momdata.DeleteReq) (res *mom
 	err = service.StockMomData().Delete(ctx, &req.MomDataDeleteInp)
 	return
 }
+
+// GetMom 获取mom指标数据表
+func (c *cSlowStochasticData) GetMom(ctx context.Context, req *momdata.GetMomReq) (res []*momdata.GetMomRes, err error) {
+	_, err = service.StockMomData().GetMom(ctx, &req.GetMomDataInp)
+	return
+}

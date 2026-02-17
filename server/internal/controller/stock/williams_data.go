@@ -65,3 +65,9 @@ func (c *cWilliamsData) Delete(ctx context.Context, req *williamsdata.DeleteReq)
 	err = service.StockWilliamsData().Delete(ctx, &req.WilliamsDataDeleteInp)
 	return
 }
+
+// GetWilliams 获取wmsr指标数据表
+func (c *cWilliamsData) GetWilliams(ctx context.Context, req *williamsdata.GetWilliamsReq) (res *williamsdata.GetWilliamsRes, err error) {
+	_, err = service.StockWilliamsData().GetWmsr(ctx, &req.GetWilliamsDataInp)
+	return
+}

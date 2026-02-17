@@ -57,3 +57,11 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetWilliamsReq 获取Williams指标数据表
+type GetWilliamsReq struct {
+	g.Meta `path:"/williamsData/getWilliams" method:"get" tags:"wmsr指标数据表" summary:"获取Williams指标数据表(百度财经)"`
+	stockin.GetWilliamsDataInp
+}
+
+type GetWilliamsRes struct{}

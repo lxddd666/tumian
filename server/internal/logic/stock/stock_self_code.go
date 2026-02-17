@@ -78,7 +78,25 @@ func (s *sStockSelfCode) SelfCodeIndicatorsApi(ctx context.Context, in *stockin.
 			_, _ = service.StockRsiData().GetRsiData(ctx, &stockin.GetRsiDataInp{Code: stockCode.Dm})
 
 			// atr
-			_, _ = service.StockAtrData().GetAtrData(ctx, &stockin.GetAtrDataInp{Symbol: stockCode.Dm})
+			//_, _ = service.StockAtrData().GetAtrData(ctx, &stockin.GetAtrDataInp{Symbol: stockCode.Dm})
+
+			// cci
+			_, _ = service.StockCciData().GetCci(ctx, &stockin.GetCciDataInp{Symbol: stockCode.Dm})
+
+			// stoch
+			_, _ = service.StockSlowStochasticData().GetStoch(ctx, &stockin.GetStochDataInp{Symbol: stockCode.Dm})
+
+			// mom
+			_, _ = service.StockMomData().GetMom(ctx, &stockin.GetMomDataInp{Symbol: stockCode.Dm})
+
+			//wmsr
+			_, _ = service.StockWilliamsData().GetWmsr(ctx, &stockin.GetWilliamsDataInp{Symbol: stockCode.Dm})
+
+			// kst
+			_, _ = service.StockKstData().GetKst(ctx, &stockin.GetKstDataInp{Symbol: stockCode.Dm})
+
+			// FASTK
+			_, _ = service.StockFastkData().GetFastk(ctx, &stockin.GetFastkDataInp{Symbol: stockCode.Dm})
 
 		})
 	}

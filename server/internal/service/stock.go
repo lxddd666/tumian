@@ -72,6 +72,8 @@ type (
 		Delete(ctx context.Context, in *stockin.CciDataDeleteInp) (err error)
 		// View 获取cci指标数据表指定信息
 		View(ctx context.Context, in *stockin.CciDataViewInp) (res *stockin.CciDataViewModel, err error)
+		// GetCci 获取cci指标
+		GetCci(ctx context.Context, in *stockin.GetCciDataInp) (data []*entity.CciData, err error)
 	}
 	IStockEnterpriseHistoricalData interface {
 		// Model 企业级历史行情数据表 (K线数据)ORM模型
@@ -102,6 +104,8 @@ type (
 		Delete(ctx context.Context, in *stockin.FastkDataDeleteInp) (err error)
 		// View 获取fastk指标数据表指定信息
 		View(ctx context.Context, in *stockin.FastkDataViewInp) (res *stockin.FastkDataViewModel, err error)
+		// GetFastk 获取GetFastk指标
+		GetFastk(ctx context.Context, in *stockin.GetFastkDataInp) (data []*entity.FastkData, err error)
 	}
 	IStockFinancialIndicators interface {
 		// Model 财务指标分析表ORM模型
@@ -196,6 +200,8 @@ type (
 		Delete(ctx context.Context, in *stockin.KstDataDeleteInp) (err error)
 		// View 获取kst指标数据表指定信息
 		View(ctx context.Context, in *stockin.KstDataViewInp) (res *stockin.KstDataViewModel, err error)
+		// GetKst 获取GetKst指标
+		GetKst(ctx context.Context, in *stockin.GetKstDataInp) (data []*entity.KstData, err error)
 	}
 	IStockMaData interface {
 		// Model 移动平均线(MA)指标数据表ORM模型
@@ -242,6 +248,8 @@ type (
 		Delete(ctx context.Context, in *stockin.MomDataDeleteInp) (err error)
 		// View 获取mom指标数据表指定信息
 		View(ctx context.Context, in *stockin.MomDataViewInp) (res *stockin.MomDataViewModel, err error)
+		// GetMom 获取mom指标
+		GetMom(ctx context.Context, in *stockin.GetMomDataInp) (data []*entity.MomData, err error)
 	}
 	IStockQuarterlyProfit interface {
 		// Model 季度利润数据表 (近一年各季度)ORM模型
@@ -320,6 +328,8 @@ type (
 		Delete(ctx context.Context, in *stockin.SlowStochasticDataDeleteInp) (err error)
 		// View 获取stoch指标数据表指定信息
 		View(ctx context.Context, in *stockin.SlowStochasticDataViewInp) (res *stockin.SlowStochasticDataViewModel, err error)
+		// GetStoch 获取GetStoch指标
+		GetStoch(ctx context.Context, in *stockin.GetStochDataInp) (data []*entity.SlowStochasticData, err error)
 	}
 	IStockAiJudgment interface {
 		// Model ai 选股判断ORM模型
@@ -448,6 +458,8 @@ type (
 		Delete(ctx context.Context, in *stockin.WilliamsDataDeleteInp) (err error)
 		// View 获取wmsr指标数据表指定信息
 		View(ctx context.Context, in *stockin.WilliamsDataViewInp) (res *stockin.WilliamsDataViewModel, err error)
+		// GetWmsr 获取GetWmsr指标
+		GetWmsr(ctx context.Context, in *stockin.GetWilliamsDataInp) (data []*entity.WilliamsData, err error)
 	}
 )
 

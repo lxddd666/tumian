@@ -13,10 +13,9 @@ import (
 
 // RsiDataDao is the data access object for the table hg_rsi_data.
 type RsiDataDao struct {
-	table    string             // table is the underlying table name of the DAO.
-	group    string             // group is the database configuration group name of the current DAO.
-	columns  RsiDataColumns     // columns contains all the column names of Table for convenient usage.
-	handlers []gdb.ModelHandler // handlers for customized model modification.
+	table   string         // table is the underlying table name of the DAO.
+	group   string         // group is the database configuration group name of the current DAO.
+	columns RsiDataColumns // columns contains all the column names of Table for convenient usage.
 }
 
 // RsiDataColumns defines and stores column names for the table hg_rsi_data.
@@ -28,7 +27,7 @@ type RsiDataColumns struct {
 	CreatedAt string // 数据创建时间
 	UpdatedAt string // 数据更新时间
 	Rsi6      string //
-	Rsi12     string //
+	Rsi14     string //
 	Rsi24     string //
 }
 
@@ -41,17 +40,16 @@ var rsiDataColumns = RsiDataColumns{
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 	Rsi6:      "rsi_6",
-	Rsi12:     "rsi_12",
+	Rsi14:     "rsi_14",
 	Rsi24:     "rsi_24",
 }
 
 // NewRsiDataDao creates and returns a new DAO object for table data access.
-func NewRsiDataDao(handlers ...gdb.ModelHandler) *RsiDataDao {
+func NewRsiDataDao() *RsiDataDao {
 	return &RsiDataDao{
-		group:    "default",
-		table:    "hg_rsi_data",
-		columns:  rsiDataColumns,
-		handlers: handlers,
+		group:   "default",
+		table:   "hg_rsi_data",
+		columns: rsiDataColumns,
 	}
 }
 
@@ -77,11 +75,7 @@ func (dao *RsiDataDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *RsiDataDao) Ctx(ctx context.Context) *gdb.Model {
-	model := dao.DB().Model(dao.table)
-	for _, handler := range dao.handlers {
-		model = handler(model)
-	}
-	return model.Safe().Ctx(ctx)
+	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

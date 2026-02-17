@@ -57,3 +57,11 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct{}
+
+// GetCciReq 获取CCI技术指标
+type GetCciReq struct {
+	g.Meta `path:"/cciData/getCci" method:"get" tags:"cci指标数据表" summary:"获取CCI技术指标(百度财经)"`
+	stockin.GetCciDataInp
+}
+
+type GetCciRes struct{}
