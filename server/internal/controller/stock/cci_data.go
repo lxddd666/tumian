@@ -69,6 +69,6 @@ func (c *cCciData) Delete(ctx context.Context, req *ccidata.DeleteReq) (res *cci
 // GetCci 获取cci数据指标
 func (c *cCciData) GetCci(ctx context.Context, req *ccidata.GetCciReq) (res *ccidata.GetCciRes, err error) {
 	//_, err = service.StockCciData().GetCci(ctx, &req.GetCciDataInp)
-	service.StockRsiData().GetRsiData(ctx, &stockin.GetRsiDataInp{Code: req.Symbol})
+	//service.StockRsiData().GetRsiData(ctx, &stockin.GetRsiDataInp{Code: req.Symbol})
 	return
 }

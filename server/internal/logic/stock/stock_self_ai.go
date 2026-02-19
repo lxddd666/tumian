@@ -24,6 +24,7 @@ import (
 	"hotgo/utility/convert"
 	"hotgo/utility/excel"
 	"regexp"
+	"time"
 
 	"github.com/openai/openai-go/option"
 )
@@ -146,7 +147,7 @@ func (s *sStockSelfAi) View(ctx context.Context, in *stockin.StockSelfAiViewInp)
 
 // GetAllAi 获取ai
 func (s *sStockSelfAi) GetAllAi(ctx context.Context, aiModel string) (list []*entity.StockSelfAi, err error) {
-	mod := s.Model(ctx)
+	mod := s.Model(ctx).WhereNot(dao.StockSelfAi.Columns().Status, -1)
 	if aiModel != "" {
 		mod = mod.Where(dao.StockSelfAi.Columns().AiModel, aiModel)
 	}
@@ -159,6 +160,8 @@ func (s *sStockSelfAi) InvokeAi(ctx context.Context, aiModel *entity.StockSelfAi
 	if aiModel == nil {
 		return
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel() // 非常重要：在函数结束时释放资源
 
 	switch aiModel.AiModel {
 	case "qianwen": //千问
@@ -202,16 +205,6 @@ func (s *sStockSelfAi) InvokeQianWen(ctx context.Context, aiModel *entity.StockS
 	chatCompletion, err := client.Chat.Completions.New(
 		context.TODO(), openaiChatCompletionNewParams,
 	)
-
-	//chatCompletion, err := client.Chat.Completions.New(
-	//	context.TODO(), openai.ChatCompletionNewParams{
-	//		Messages: []openai.ChatCompletionMessageParamUnion{
-	//			openai.UserMessage("aaa"),
-	//			openai.UserMessage("bbb"),
-	//		},
-	//		Model: aiModel.Model,
-	//	},
-	//)
 
 	if err != nil {
 		panic(err.Error())
