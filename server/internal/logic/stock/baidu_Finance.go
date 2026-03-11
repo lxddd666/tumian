@@ -2,6 +2,7 @@ package stock
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/chromedp/chromedp"
 	"github.com/gogf/gf/v2/frame/g"
@@ -12,6 +13,8 @@ import (
 	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/utility/simple"
+	"io"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -21,7 +24,7 @@ func (s *sStockSelfCode) BaiduFinanceCode(ctx context.Context, in *stockin.SelfC
 
 	// 获取全部股票
 	var list []*entity.StockAllCode
-	err = dao.StockAllCode.Ctx(ctx).Scan(&list)
+	err = dao.StockSelfCode.Ctx(ctx).Scan(&list)
 	if err != nil {
 		return
 	}
@@ -145,9 +148,16 @@ func supportResistance(ctx context.Context, stock *entity.StockAllCode) (err err
 	if err != nil {
 		return
 	}
-	if support == nil || gtime.Now().Sub(support.T).Hours() > 24 {
+	if support == nil || gtime.Now().Sub(support.CreatedAt).Hours() > 24 {
 		var result map[string]interface{}
-		_ = g.Client().GetVar(ctx, fmt.Sprintf("https://finance.pae.baidu.com/sapi/v1/get_analysis_quotation?all=1&newFormat=1&ktype=day&group=quotation_analysis_kline&code=%s&market_type=ab&finClientType=pc", code)).Scan(&result)
+		url := fmt.Sprintf("https://finance.pae.baidu.com/sapi/v1/get_analysis_quotation?all=1&newFormat=1&ktype=day&group=quotation_analysis_kline&code=%s&market_type=ab&finClientType=pc", code)
+
+		//err = g.Client().GetVar(ctx, url).Scan(&result)
+		body, hErr := GetHttp(url)
+		if hErr != nil {
+			return
+		}
+		err = gconv.Scan(body, &result)
 		if result != nil {
 			newSupport := new(entity.StockSupportResistance)
 			newSupport.Symbol = stock.Dm
@@ -341,4 +351,80 @@ func SetupBrowserOptions() []chromedp.ExecAllocatorOption {
 		chromedp.Flag("disable-sync", true),
 	)
 	return opts
+}
+
+func GetHttp(targetURL string) (result interface{}, err error) {
+	// 发起GET请求
+	//resp, err := http.Get(url)
+	//if err != nil {
+	//	return
+	//}
+	//defer resp.Body.Close()
+	//
+	//// 读取响应体
+	//body, err = io.ReadAll(resp.Body)
+	//if err != nil {
+	//	return
+	//}
+	// --- 1. 配置浏览器启动选项 ---
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+			MaxIdleConns:        10,
+			IdleConnTimeout:     30 * time.Second,
+			DisableKeepAlives:   false, // 可以尝试 true 或 false
+			TLSHandshakeTimeout: 5 * time.Second,
+		},
+	}
+
+	// 创建请求
+	req, err := http.NewRequest("GET", targetURL, nil)
+	if err != nil {
+		fmt.Println("创建请求失败:", err)
+		return
+	}
+
+	// 设置关键的请求头，模仿浏览器
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "application/json, text/plain, */*")
+	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+	// 有些服务器会检查 Referer，可以按需添加
+	// req.Header.Set("Referer", "https://example.com")
+	// 如果需要压缩，可以设置 Accept-Encoding，但 Go 默认会处理
+	// req.Header.Set("Accept-Encoding", "gzip, deflate, br")
+
+	// 发送请求
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("请求失败:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// 读取响应体
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("读取响应体失败:", err)
+		return
+	}
+
+	// 检查 HTTP 状态码
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("HTTP 错误: %s\n", resp.Status)
+		fmt.Println("响应内容:", string(body))
+		return
+	}
+
+	// 如果是 JSON，可以直接解析
+	if err = json.Unmarshal(body, &result); err != nil {
+		fmt.Println("JSON 解析失败:", err)
+		fmt.Println("原始响应:", string(body))
+		return
+	}
+
+	// 打印格式化后的 JSON
+	prettyJSON, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Println("获取成功，响应内容:")
+	fmt.Println(string(prettyJSON))
+	return
 }

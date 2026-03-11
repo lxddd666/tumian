@@ -13,10 +13,9 @@ import (
 
 // StockAiJudgmentDao is the data access object for the table hg_stock_ai_judgment.
 type StockAiJudgmentDao struct {
-	table    string                 // table is the underlying table name of the DAO.
-	group    string                 // group is the database configuration group name of the current DAO.
-	columns  StockAiJudgmentColumns // columns contains all the column names of Table for convenient usage.
-	handlers []gdb.ModelHandler     // handlers for customized model modification.
+	table   string                 // table is the underlying table name of the DAO.
+	group   string                 // group is the database configuration group name of the current DAO.
+	columns StockAiJudgmentColumns // columns contains all the column names of Table for convenient usage.
 }
 
 // StockAiJudgmentColumns defines and stores column names for the table hg_stock_ai_judgment.
@@ -28,6 +27,12 @@ type StockAiJudgmentColumns struct {
 	IndicatorsFlag           string // 指标判断 1是2否
 	FinancialJudgment        string // 财务判断
 	FinancialFlag            string // 财务判断 1是2否
+	FinancialRatingJudgment  string // 财报评分
+	FinancialRatingFlag      string // 财报评分 1是2否
+	MarketAnalysisJudgment   string // 市场资金分析
+	MarketAnalysisFlag       string // 市场资金分析 1是2否
+	ValueAssessmentJudgment  string // 价值估算
+	ValueAssessmentFlag      string // 价值估算 1是2否
 	ComprehensiveJudgment    string // 综合判断
 	ComprehensiveFlag        string // 综合判断 1是2否
 	Target                   string // 开仓止盈价格
@@ -52,6 +57,12 @@ var stockAiJudgmentColumns = StockAiJudgmentColumns{
 	IndicatorsFlag:           "indicators_flag",
 	FinancialJudgment:        "financial_judgment",
 	FinancialFlag:            "financial_flag",
+	FinancialRatingJudgment:  "financial_rating_judgment",
+	FinancialRatingFlag:      "financial_rating_flag",
+	MarketAnalysisJudgment:   "market_analysis_judgment",
+	MarketAnalysisFlag:       "market_analysis_flag",
+	ValueAssessmentJudgment:  "value_assessment_judgment",
+	ValueAssessmentFlag:      "value_assessment_flag",
 	ComprehensiveJudgment:    "comprehensive_judgment",
 	ComprehensiveFlag:        "comprehensive_flag",
 	Target:                   "target",
@@ -68,12 +79,11 @@ var stockAiJudgmentColumns = StockAiJudgmentColumns{
 }
 
 // NewStockAiJudgmentDao creates and returns a new DAO object for table data access.
-func NewStockAiJudgmentDao(handlers ...gdb.ModelHandler) *StockAiJudgmentDao {
+func NewStockAiJudgmentDao() *StockAiJudgmentDao {
 	return &StockAiJudgmentDao{
-		group:    "default",
-		table:    "hg_stock_ai_judgment",
-		columns:  stockAiJudgmentColumns,
-		handlers: handlers,
+		group:   "default",
+		table:   "hg_stock_ai_judgment",
+		columns: stockAiJudgmentColumns,
 	}
 }
 
@@ -99,11 +109,7 @@ func (dao *StockAiJudgmentDao) Group() string {
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *StockAiJudgmentDao) Ctx(ctx context.Context) *gdb.Model {
-	model := dao.DB().Model(dao.table)
-	for _, handler := range dao.handlers {
-		model = handler(model)
-	}
-	return model.Safe().Ctx(ctx)
+	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.

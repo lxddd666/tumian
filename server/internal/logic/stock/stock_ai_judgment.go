@@ -19,6 +19,8 @@ import (
 	"hotgo/internal/model/entity"
 	"hotgo/internal/model/input/stockin"
 	"hotgo/internal/service"
+	"hotgo/utility/convert"
+	"hotgo/utility/excel"
 	"hotgo/utility/simple"
 	"sync"
 	"time"
@@ -39,7 +41,7 @@ func (s *sStockAiJudgment) Model(ctx context.Context, option ...*handler.Option)
 	return handler.Model(dao.StockAiJudgment.Ctx(ctx), option...)
 }
 
-const SystemMessage = `你资深量化分析师。根据1d的K线及MACD/MA/BOLL/KDJ指标以及财报、公司估值、财报指标、历史股票支撑压力位、分析行情等，输出JSON交易决策。`
+const SystemMessage = `你资深量化分析师。根据1d的K线及各种股票指标以及财报、公司估值、财报指标、历史股票支撑压力位、估值等分析行情等，输出JSON交易决策。`
 
 // AiJudgmentComprehensiveData 综合
 func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *stockin.StockAiJudgmentAiJudgmentInp) {
@@ -65,6 +67,7 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 		//simple.SafeGo(gctx.New(), func(ctx context.Context) {
 		//	wg.Done()
 		scripts := make([]string, 0)
+		scripts = append(scripts, SystemMessage)
 
 		var kLine *entity.EnterpriseHistoricalData
 		_ = service.StockEnterpriseHistoricalData().Model(ctx).Where(dao.EnterpriseHistoricalData.Columns().Symbol, stockCode.Dm).OrderDesc(dao.EnterpriseHistoricalData.Columns().T).Scan(&kLine)
@@ -311,11 +314,17 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 		outputFormat := fmt.Sprintf(`
 			请按此JSON,仅仅输出{}内容,格式输出决策(无Markdown):
 			{{
-			 "indicatorsJudgment": "指标MACD、MA、BOLL、KDJ、Rsi、CCI、Slow Stochastic、MOM、WMSR、KST、FASTK、资金流动方向判断,给出一个短中长期投资建议以及理由<100字"
-			 "indicatorsFlag": "仅根据当日数据指标MACD、MA、BOLL、KDJ、Rsi、CCI、Slow Stochastic、MOM、WMSR、KST、FASTK、资金流动方向判断是否买入 1买入 0不买(填1/0)",
+			 "indicatorsJudgment": "指标MACD、MA、BOLL、KDJ、Rsi、CCI、Slow Stochastic、MOM、WMSR、KST、FASTK,给出一个短中长期投资建议以及理由<100字"
+			 "indicatorsFlag": "仅根据当日数据指标MACD、MA、BOLL、KDJ、Rsi、CCI、Slow Stochastic、MOM、WMSR、KST、FASTK判断是否买入 1买入 0不买(填1/0)",
 			 "financialJudgment: "仅根据公司股票、财务、财报指标数据判断是否应该买入/卖出，给出一个短中长期投资建议以及理由<100字",
 			 "financialFlag": "仅根据公司股票、财务、财报指标数据判断是否应该买入 1买入 0不买(填1/0)",
-			 "comprehensiveJudgment": "综合指标，根据当前数据指标和当前公司的公司股票、财务、财报指标数据来给出一个综合的短中长投资建议理由<100字"
+			 "financialRatingJudgment": "仅靠公司的盈利能力、偿债能力、盈利质量、股息回报，给出一个短中长期投资建议以及理由<100字",
+			 "financialRatingFlag": "仅靠公司的盈利能力、偿债能力、盈利质量、股息回报，判断股票是否应该买入，1买入 0不买(填1/0)",
+			 "marketAnalysisJudgment": "根据资金流向明细判断股票是否应该买入/卖出，给出一个投资简易以及理由<50字",
+			 "marketAnalysisFlag": "根据资金流向明细判断股票是否应该买入/卖出，1买入 0不买(填1/0)",
+			 "valueAssessmentJudgment: "根据股票价格支撑位、压力位以及股票相对估值，市盈率TTM、市净率TTM，给出一个投资建议以及理由<50字",
+			 "valueAssessmentFlag: "根据股票价格支撑位、压力位以及股票相对估值，市盈率TTM、市净率TTM，1买入 0不买(填1/0)",
+			 "comprehensiveJudgment": "综合指标，根据上面所诉内容，即当前股票数据指标和当前公司的公司股票、财务、财务评分（盈利能力、偿债能力、盈利质量、股息回报）、财报指标数据、股票压力位支撑位、股票相对估值、资金流动方向、来给出一个综合的短中投资建议理由<150字"
 			 "comprehensiveFlag": "根据综合指标判断是否买入 1买入 0不买(填1/0)
 			 "target": "根据综合指标，买入必须确定一个预计止盈价",
 			 "stop": "根据综合指标，买入必须确定一个预计止损价"
@@ -326,7 +335,6 @@ func (s *sStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, in *
 			3.开仓必填止盈损
 		`)
 
-		scripts = append(scripts, SystemMessage)
 		scripts = append(scripts, indicatorStr) // 财报指标
 		scripts = append(scripts, financialStr) // 财务指标
 		scripts = append(scripts, outputFormat) // 输出格式
@@ -611,4 +619,40 @@ func (s *sStockAiJudgment) AiJudgmentFinancialData(ctx context.Context, in *stoc
 			service.StockAiJudgment().Model(ctx).Insert(resMap)
 		}
 	}
+}
+
+func (s *sStockAiJudgment) Export(ctx context.Context) (err error) {
+	now := GetRecentWeekdayClear()
+	//type totalScoreModel struct {
+	//	totalScore int
+	//	symbol     string
+	//}
+	//totalScoreList := make([]totalScoreModel, 0)
+	//err = dao.StockAiJudgment.Ctx(ctx).Fields("sum(comprehensive_flag) totalScore, symbol").Where(dao.StockAiJudgment.Columns().T, now).Group(dao.StockAiJudgment.Columns().Symbol).OrderDesc("totalScore").Scan(&totalScoreList)
+	//if err != nil {
+	//	return
+	//}
+	//scoreMap := make(map[string]int)
+	//for _, l := range totalScoreList {
+	//	scoreMap[l.symbol] = l.totalScore
+	//}
+
+	list := make([]stockin.StockAiJudgmentExportModel, 0)
+
+	sqlinnerJoin := fmt.Sprintf(" (SELECT symbol, SUM(comprehensive_flag) as totalScore    FROM hg_stock_ai_judgment    WHERE t = '%s'    GROUP BY symbol) as score", now)
+	err = dao.StockAiJudgment.Ctx(ctx).As("aj").Fields("aj.* ,score.totalScore").InnerJoin(sqlinnerJoin, "aj.symbol = score.symbol").Where("aj.t", now).OrderDesc("score.totalScore,aj.symbol").Scan(&list)
+	if err != nil {
+		return
+	}
+
+	tags, err := convert.GetEntityDescTags(stockin.StockAiJudgmentExportModel{})
+	if err != nil {
+		return
+	}
+	var (
+		fileName  = "导出今天ai选股-" + GetRecentWeekdayClear()
+		sheetName = fmt.Sprintf("导出%d条数据", len(list))
+	)
+	err = excel.ExportByStructs(ctx, tags, list, fileName, sheetName)
+	return
 }

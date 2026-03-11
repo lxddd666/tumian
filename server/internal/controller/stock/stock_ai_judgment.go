@@ -35,3 +35,9 @@ func (c *cStockAiJudgment) AiJudgmentComprehensiveData(ctx context.Context, req 
 	service.StockAiJudgment().AiJudgmentComprehensiveData(ctx, &req.StockAiJudgmentAiJudgmentInp)
 	return
 }
+
+// AiJudgmentComprehensiveData ai综合指标数据鉴定股票鉴股
+func (c *cStockAiJudgment) Export(ctx context.Context, req *stockaijudgment.ExportReq) (res *stockaijudgment.ExportRes, err error) {
+	err = service.StockAiJudgment().Export(ctx)
+	return
+}

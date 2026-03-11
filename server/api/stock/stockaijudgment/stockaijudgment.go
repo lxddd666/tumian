@@ -44,7 +44,7 @@ type ViewRes struct {
 
 // EditReq 修改/新增ai 选股判断
 type EditReq struct {
-	g.Meta `path:"/stockAiJudgment/edit" method:"post" tags:"ai 选股判断" summary:"修改/新增ai 选股判断"`
+	g.Meta `path:"/stockAiJudgment/edit" method:"post" tags:"ai 选股判断" summary:"ai荐股导出"`
 	stockin.StockAiJudgmentEditInp
 }
 

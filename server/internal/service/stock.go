@@ -340,6 +340,7 @@ type (
 		InvokeIndicatorsJudgment(ctx context.Context, in *stockin.StockAiJudgmentAiJudgmentInp)
 		// AiJudgmentFinancialData 财报数据ai鉴定
 		AiJudgmentFinancialData(ctx context.Context, in *stockin.StockAiJudgmentAiJudgmentInp)
+		Export(ctx context.Context) (err error)
 	}
 	IStockBasicInfo interface {
 		// Model 股票基础信息表ORM模型

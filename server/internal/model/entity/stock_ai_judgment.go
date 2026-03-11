@@ -17,6 +17,12 @@ type StockAiJudgment struct {
 	IndicatorsFlag           string      `json:"indicatorsFlag"           orm:"indicators_flag"            description:"指标判断 1是2否"`
 	FinancialJudgment        string      `json:"financialJudgment"        orm:"financial_judgment"         description:"财务判断"`
 	FinancialFlag            string      `json:"financialFlag"            orm:"financial_flag"             description:"财务判断 1是2否"`
+	FinancialRatingJudgment  string      `json:"financialRatingJudgment"  orm:"financial_rating_judgment"  description:"财报评分"`
+	FinancialRatingFlag      string      `json:"financialRatingFlag"      orm:"financial_rating_flag"      description:"财报评分 1是2否"`
+	MarketAnalysisJudgment   string      `json:"marketAnalysisJudgment"   orm:"market_analysis_judgment"   description:"市场资金分析"`
+	MarketAnalysisFlag       string      `json:"marketAnalysisFlag"       orm:"market_analysis_flag"       description:"市场资金分析 1是2否"`
+	ValueAssessmentJudgment  string      `json:"valueAssessmentJudgment"  orm:"value_assessment_judgment"  description:"价值估算"`
+	ValueAssessmentFlag      string      `json:"valueAssessmentFlag"      orm:"value_assessment_flag"      description:"价值估算 1是2否"`
 	ComprehensiveJudgment    string      `json:"comprehensiveJudgment"    orm:"comprehensive_judgment"     description:"综合判断"`
 	ComprehensiveFlag        string      `json:"comprehensiveFlag"        orm:"comprehensive_flag"         description:"综合判断 1是2否"`
 	Target                   float64     `json:"target"                   orm:"target"                     description:"开仓止盈价格"`
